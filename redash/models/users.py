@@ -183,6 +183,10 @@ class User(TimestampMixin, db.Model, BelongsToOrgMixin, UserMixin, PermissionsCh
         return cls.query.filter(cls.id == _id).one()
 
     @classmethod
+    def get_by_email(cls, email):
+        return cls.query.filter(cls.email == email).one()
+
+    @classmethod
     def get_by_email_and_org(cls, email, org):
         return cls.get_by_org(org).filter(cls.email == email).one()
 

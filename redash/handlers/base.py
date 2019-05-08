@@ -126,6 +126,10 @@ def json_response(response):
     return current_app.response_class(json_dumps(response), mimetype='application/json')
 
 
+def json_response_with_status(response, status):
+    return current_app.response_class(json_dumps(response), status=status, mimetype='application/json')
+
+
 def filter_by_tags(result_set, column):
     if request.args.getlist('tags'):
         tags = request.args.getlist('tags')
