@@ -285,13 +285,7 @@ dynamic_settings = importlib.import_module(os.environ.get('REDASH_DYNAMIC_SETTIN
 # Destinations
 default_destinations = [
     'redash.destinations.email',
-    'redash.destinations.slack',
     'redash.destinations.webhook',
-    'redash.destinations.hipchat',
-    'redash.destinations.mattermost',
-    'redash.destinations.chatwork',
-    'redash.destinations.pagerduty',
-    'redash.destinations.hangoutschat'
 ]
 
 enabled_destinations = array_from_string(os.environ.get("REDASH_ENABLED_DESTINATIONS", ",".join(default_destinations)))
