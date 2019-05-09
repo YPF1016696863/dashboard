@@ -23,7 +23,6 @@ def create_app():
     from . import extensions, handlers, limiter, mail, migrate, security
     from .apis import authentication
     from .destinations import import_destinations
-    from .handlers import chrome_logger
     from .handlers.webpack import configure_webpack
     from .metrics import request as request_metrics
     from .models import db, users
@@ -51,7 +50,6 @@ def create_app():
     handlers.init_app(app)
     configure_webpack(app)
     extensions.init_app(app)
-    chrome_logger.init_app(app)
     users.init_app(app)
 
     return app
