@@ -441,5 +441,5 @@ class ElasticSearch(BaseElasticSearch):
         return json_data, error
 
 
-register(Kibana)
+#register(Kibana)
 register(ElasticSearch)
