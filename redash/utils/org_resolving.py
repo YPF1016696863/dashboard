@@ -1,9 +1,10 @@
 import logging
 
-from flask import g, request
-from werkzeug.local import LocalProxy
-
+from flask import request, g
 from redash.models import Organization
+
+logger = logging.getLogger('utils.org_resolving')
+from werkzeug.local import LocalProxy
 
 
 def _get_current_org():
@@ -19,5 +20,5 @@ def _get_current_org():
     logging.debug("Current organization: %s (slug: %s)", g.org, slug)
     return g.org
 
-# TODO: move to authentication
+
 current_org = LocalProxy(_get_current_org)

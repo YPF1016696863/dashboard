@@ -2,7 +2,7 @@ from flask import g, redirect, render_template, request, url_for
 
 from flask_login import login_user
 from redash import settings
-from redash.authentication.org_resolving import current_org
+from redash.utils.org_resolving import current_org
 from redash.handlers.base import routes
 from redash.models import Group, Organization, User, db
 from redash.tasks.general import subscribe

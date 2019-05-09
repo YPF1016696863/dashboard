@@ -1,7 +1,7 @@
 from flask import jsonify
 from flask_login import login_required
 
-from redash.handlers.api import api
+from redash.apis.api import api
 from redash.handlers.base import routes
 from redash.monitor import get_status
 from redash.permissions import require_super_admin
@@ -23,6 +23,6 @@ def status_api():
 
 
 def init_app(app):
-    from redash.handlers import embed, queries, static, authentication, admin, setup, organization
+    from redash.handlers import embed, queries, static, setup, organization
     app.register_blueprint(routes)
     api.init_app(app)

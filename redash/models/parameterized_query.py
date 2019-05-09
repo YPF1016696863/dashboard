@@ -18,7 +18,7 @@ def _pluck_name_and_value(default_column, row):
 
 
 def _load_result(query_id, should_require_access):
-    from redash.authentication.org_resolving import current_org
+    from redash.utils.org_resolving import current_org
     from redash import models
 
     query = models.Query.get_by_id_and_org(query_id, current_org)

@@ -1,5 +1,3 @@
-import time
-
 from flask import request
 from funcy import project
 
@@ -15,11 +13,6 @@ class AlertResource(BaseResource):
     def get(self, alert_id):
         alert = get_object_or_404(models.Alert.get_by_id_and_org, alert_id, self.current_org)
         require_access(alert, self.current_user, view_only)
-        self.record_event({
-            'action': 'view',
-            'object_id': alert.id,
-            'object_type': 'alert'
-        })
         return serialize_alert(alert)
 
     def post(self, alert_id):
@@ -30,12 +23,6 @@ class AlertResource(BaseResource):
 
         self.update_model(alert, params)
         models.db.session.commit()
-
-        self.record_event({
-            'action': 'edit',
-            'object_id': alert.id,
-            'object_type': 'alert'
-        })
 
         return serialize_alert(alert)
 
@@ -67,20 +54,10 @@ class AlertListResource(BaseResource):
         models.db.session.flush()
         models.db.session.commit()
 
-        self.record_event({
-            'action': 'create',
-            'object_id': alert.id,
-            'object_type': 'alert'
-        })
-
         return serialize_alert(alert)
 
     @require_permission('list_alerts')
     def get(self):
-        self.record_event({
-            'action': 'list',
-            'object_type': 'alert'
-        })
         return [serialize_alert(alert) for alert in models.Alert.all(group_ids=self.current_user.group_ids)]
 
 
@@ -100,13 +77,6 @@ class AlertSubscriptionListResource(BaseResource):
         models.db.session.add(subscription)
         models.db.session.commit()
 
-        self.record_event({
-            'action': 'subscribe',
-            'object_id': alert_id,
-            'object_type': 'alert',
-            'destination': req.get('destination_id')
-        })
-
         d = subscription.to_dict()
         return d
 
@@ -125,9 +95,3 @@ class AlertSubscriptionResource(BaseResource):
         require_admin_or_owner(subscription.user.id)
         models.db.session.delete(subscription)
         models.db.session.commit()
-
-        self.record_event({
-            'action': 'unsubscribe',
-            'object_id': alert_id,
-            'object_type': 'alert'
-        })

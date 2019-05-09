@@ -1,5 +1,3 @@
-import re
-import time
 from flask import request
 from flask_restful import abort
 from flask_login import current_user, login_user
@@ -14,7 +12,7 @@ from redash.permissions import require_permission, require_admin_or_owner, is_ad
     require_permission_or_owner, require_admin
 from redash.handlers.base import BaseResource, require_fields, get_object_or_404, paginate, order_results as _order_results
 
-from redash.authentication.account import invite_link_for_user, send_invite_email, send_password_reset_email, send_verify_email
+from redash.utils.account import invite_link_for_user, send_invite_email, send_password_reset_email, send_verify_email
 from redash.settings import parse_boolean
 from redash import settings
 

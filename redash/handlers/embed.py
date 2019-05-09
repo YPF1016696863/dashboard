@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
 from flask import request
-
-from .authentication import current_org
 from flask_login import current_user, login_required
+
+from redash.utils.org_resolving import current_org
 from redash import models
 from redash.handlers import routes
 from redash.handlers.base import (get_object_or_404, org_scoped_rule,

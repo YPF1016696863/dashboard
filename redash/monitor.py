@@ -99,29 +99,30 @@ def get_waiting_in_queue(queue_name):
 def parse_tasks(task_lists, state):
     rows = []
 
-    for task in itertools.chain(*task_lists.values()):
-        task_row = {
-            'state': state,
-            'task_name': task['name'],
-            'worker': task['hostname'],
-            'queue': task['delivery_info']['routing_key'],
-            'task_id': task['id'],
-            'worker_pid': task['worker_pid'],
-            'start_time': task['time_start'],
-        }
+    if task_lists is not None:
+        for task in itertools.chain(*task_lists.values()):
+            task_row = {
+                'state': state,
+                'task_name': task['name'],
+                'worker': task['hostname'],
+                'queue': task['delivery_info']['routing_key'],
+                'task_id': task['id'],
+                'worker_pid': task['worker_pid'],
+                'start_time': task['time_start'],
+            }
 
-        if task['name'] == 'redash.tasks.execute_query':
-            try:
-                args = json_loads(task['args'])
-            except ValueError:
-                args = {}
+            if task['name'] == 'redash.tasks.execute_query':
+                try:
+                    args = json_loads(task['args'])
+                except ValueError:
+                    args = {}
 
-            if args.get('query_id') == 'adhoc':
-                args['query_id'] = None
+                if args.get('query_id') == 'adhoc':
+                    args['query_id'] = None
 
-            task_row.update(args)
+                task_row.update(args)
 
-        rows.append(task_row)
+            rows.append(task_row)
 
     return rows
 

@@ -6,7 +6,7 @@ from flask import Blueprint, current_app, request
 from flask_login import current_user, login_required
 from flask_restful import Resource, abort
 from redash import settings
-from redash.authentication import current_org
+from redash.utils.org_resolving import current_org
 from redash.models import db
 from redash.tasks import record_event as record_event_task
 from redash.utils import json_dumps
