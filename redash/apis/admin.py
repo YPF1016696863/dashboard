@@ -1,15 +1,17 @@
 import logging
+
 from flask_login import login_required
 
 from redash import models, redis_connection
 from redash.handlers import routes
 from redash.handlers.base import json_response
+from redash.monitor import celery_tasks
 from redash.permissions import require_super_admin
 from redash.serializers import QuerySerializer
 from redash.utils import json_loads
-from redash.monitor import celery_tasks
 
 logger = logging.getLogger(__name__)
+
 
 @routes.route('/api/admin/queries/outdated', methods=['GET'])
 @require_super_admin
