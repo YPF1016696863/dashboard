@@ -1,5 +1,4 @@
 from flask import request, url_for
-from flask import request, url_for
 from flask_restful import abort
 from funcy import partial
 from sqlalchemy.orm.exc import StaleDataError

@@ -109,6 +109,7 @@ def paginate(query_set, page, page_size, serializer, **kwargs):
         'results': items,
     }
 
+
 def filter_by_tags(result_set, column):
     if request.args.getlist('tags'):
         tags = request.args.getlist('tags')
