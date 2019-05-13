@@ -4,7 +4,6 @@ from flask_mail import Message
 
 from redash import mail, models, settings
 from redash.models import users
-from redash.version_check import run_version_check
 from redash.worker import celery
 
 logger = get_task_logger(__name__)
@@ -27,11 +26,6 @@ def record_event(raw_event):
                 logger.error("Failed posting to %s: %s", hook, response.content)
         except Exception:
             logger.exception("Failed posting to %s", hook)
-
-
-@celery.task(name="redash.tasks.version_check")
-def version_check():
-    run_version_check()
 
 
 @celery.task(name="redash.tasks.subscribe")

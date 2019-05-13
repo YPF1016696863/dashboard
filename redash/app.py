@@ -27,13 +27,9 @@ def create_app():
     from .models import db, users
     from .query_runner import import_query_runners
     from .utils import sentry
-    from .version_check import reset_new_version_status
 
     sentry.init()
     app = Redash()
-
-    # Check and update the cached version for use by the client
-    app.before_first_request(reset_new_version_status)
 
     # Load query runners and destinations
     import_query_runners(settings.QUERY_RUNNERS)
