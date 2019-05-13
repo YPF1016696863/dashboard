@@ -3,7 +3,6 @@ from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.models import generic_repr
 
 from redash.settings.organization import settings as org_settings
-
 from .base import db, Column
 from .mixins import TimestampMixin
 from .types import MutableDict, PseudoJSON
@@ -21,7 +20,7 @@ class Organization(TimestampMixin, db.Model):
     slug = Column(db.String(255), unique=True)
     settings = Column(MutableDict.as_mutable(PseudoJSON))
     groups = db.relationship("Group", lazy="dynamic")
-    events = db.relationship("Event", lazy="dynamic", order_by="desc(Event.created_at)",)
+    events = db.relationship("Event", lazy="dynamic", order_by="desc(Event.created_at)", )
 
     __tablename__ = 'organizations'
 

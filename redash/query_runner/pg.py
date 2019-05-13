@@ -1,4 +1,3 @@
-import os
 import logging
 import select
 
@@ -92,9 +91,9 @@ class PostgreSQL(BaseSQLQueryRunner):
                     "title": "Database Name"
                 },
                 "sslmode": {
-                   "type": "string",
-                   "title": "SSL Mode",
-                   "default": "prefer"
+                    "type": "string",
+                    "title": "SSL Mode",
+                    "default": "prefer"
                 }
             },
             "order": ['host', 'port', 'user', 'password'],

@@ -2,11 +2,11 @@ from flask import request
 from funcy import project
 
 from redash import models
-from redash.serializers import serialize_alert
 from redash.handlers.base import (BaseResource, get_object_or_404,
                                   require_fields)
 from redash.permissions import (require_access, require_admin_or_owner,
                                 require_permission, view_only)
+from redash.serializers import serialize_alert
 
 
 class AlertResource(BaseResource):

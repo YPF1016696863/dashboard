@@ -47,7 +47,8 @@ def setup():
         }, 403)
 
     setup_info = request.get_json(True)
-    default_org, user = create_org(setup_info["org_name"], setup_info["name"], setup_info["email"], setup_info["password"])
+    default_org, user = create_org(setup_info["org_name"], setup_info["name"], setup_info["email"],
+                                   setup_info["password"])
     g.org = default_org
     login_user(user)
 

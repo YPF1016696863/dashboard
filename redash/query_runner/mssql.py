@@ -1,6 +1,4 @@
 import logging
-import sys
-import uuid
 
 from redash.query_runner import *
 from redash.utils import json_dumps, json_loads
@@ -9,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import pymssql
+
     enabled = True
 except ImportError:
     enabled = False
@@ -127,7 +126,8 @@ class SqlServer(BaseSQLQueryRunner):
             if port != 1433:
                 server = server + ':' + str(port)
 
-            connection = pymssql.connect(server=server, user=user, password=password, database=db, tds_version=tds_version, charset=charset)
+            connection = pymssql.connect(server=server, user=user, password=password, database=db,
+                                         tds_version=tds_version, charset=charset)
 
             if isinstance(query, unicode):
                 query = query.encode(charset)
@@ -167,5 +167,6 @@ class SqlServer(BaseSQLQueryRunner):
                 connection.close()
 
         return json_data, error
+
 
 register(SqlServer)

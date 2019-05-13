@@ -1,4 +1,5 @@
 from __future__ import print_function
+
 from sys import exit
 
 import click
@@ -18,7 +19,7 @@ manager = AppGroup(help="Data sources management commands.")
 @manager.command()
 @click.option('--org', 'organization', default=None,
               help="The organization the user belongs to (leave blank for "
-              "all organizations).")
+                   "all organizations).")
 def list(organization=None):
     """List currently configured data sources."""
     if organization:
@@ -37,8 +38,8 @@ def list(organization=None):
 
 def validate_data_source_type(type):
     if type not in query_runners.keys():
-        print ("Error: the type \"{}\" is not supported (supported types: {})."
-               .format(type, ", ".join(query_runners.keys())))
+        print("Error: the type \"{}\" is not supported (supported types: {})."
+              .format(type, ", ".join(query_runners.keys())))
         print("OJNK")
         exit(1)
 
@@ -47,7 +48,7 @@ def validate_data_source_type(type):
 @click.argument('name')
 @click.option('--org', 'organization', default='default',
               help="The organization the user belongs to "
-              "(leave blank for 'default').")
+                   "(leave blank for 'default').")
 def test(name, organization='default'):
     """Test connection to data source by issuing a trivial query."""
     try:
@@ -77,7 +78,7 @@ def test(name, organization='default'):
               help="updated options for the data source")
 @click.option('--org', 'organization', default='default',
               help="The organization the user belongs to (leave blank for "
-              "'default').")
+                   "'default').")
 def new(name=None, type=None, options=None, organization='default'):
     """Create new data source."""
 
@@ -149,7 +150,7 @@ def new(name=None, type=None, options=None, organization='default'):
 @click.argument('name')
 @click.option('--org', 'organization', default='default',
               help="The organization the user belongs to (leave blank for "
-              "'default').")
+                   "'default').")
 def delete(name, organization='default'):
     """Delete data source by name."""
     try:
@@ -182,7 +183,7 @@ def update_attr(obj, attr, new_value):
               help="new type for the data source")
 @click.option('--org', 'organization', default='default',
               help="The organization the user belongs to (leave blank for "
-              "'default').")
+                   "'default').")
 def edit(name, new_name=None, options=None, type=None, organization='default'):
     """Edit data source settings (name, options, type)."""
     try:

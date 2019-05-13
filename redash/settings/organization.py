@@ -1,5 +1,7 @@
 from __future__ import print_function
+
 import os
+
 from .helpers import parse_boolean
 
 if os.environ.get("REDASH_SAML_LOCAL_METADATA_PATH") is not None:
@@ -7,7 +9,6 @@ if os.environ.get("REDASH_SAML_LOCAL_METADATA_PATH") is not None:
     print("SAML_LOCAL_METADATA_PATH is no longer supported. Only URL metadata is supported now, please update")
     print("your configuration and reload.")
     raise SystemExit(1)
-
 
 PASSWORD_LOGIN_ENABLED = parse_boolean(os.environ.get("REDASH_PASSWORD_LOGIN_ENABLED", "true"))
 

@@ -1,17 +1,15 @@
-import logging
-import time
-
 from flask import make_response, request
 from flask_login import current_user
 from flask_restful import abort
+
 from redash import models, settings
 from redash.handlers.base import BaseResource, get_object_or_404
+from redash.models.parameterized_query import ParameterizedQuery, InvalidParameterError, dropdown_values
 from redash.permissions import (has_access, not_view_only, require_access,
                                 require_permission, view_only)
 from redash.tasks import QueryTask
 from redash.tasks.queries import enqueue_query
-from redash.utils import (collect_parameters_from_request, gen_query_hash, json_dumps, utcnow, to_filename)
-from redash.models.parameterized_query import ParameterizedQuery, InvalidParameterError, dropdown_values
+from redash.utils import (collect_parameters_from_request, json_dumps, to_filename)
 
 
 def error_response(message):
@@ -90,7 +88,8 @@ class QueryResultListResource(BaseResource):
         data_source = models.DataSource.get_by_id_and_org(params.get('data_source_id'), self.current_org)
 
         if not has_access(data_source, self.current_user, not_view_only):
-            return {'job': {'status': 4, 'error': 'You do not have permission to run queries with this data source.'}}, 403
+            return {'job': {'status': 4,
+                            'error': 'You do not have permission to run queries with this data source.'}}, 403
 
         self.record_event({
             'action': 'execute_query',
@@ -173,7 +172,8 @@ class QueryResultResource(BaseResource):
         if has_access(query, self.current_user, allow_executing_with_view_only_permissions):
             return run_query(query.parameterized, parameter_values, query.data_source, query_id, max_age)
         else:
-            return {'job': {'status': 4, 'error': 'You do not have permission to run queries with this data source.'}}, 403
+            return {'job': {'status': 4,
+                            'error': 'You do not have permission to run queries with this data source.'}}, 403
 
     @require_permission('view_query')
     def get(self, query_id=None, query_result_id=None, filetype='json'):

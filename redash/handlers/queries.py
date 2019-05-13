@@ -2,22 +2,21 @@ import sqlparse
 from flask import jsonify, request, url_for
 from flask_login import login_required
 from flask_restful import abort
-from sqlalchemy.orm.exc import StaleDataError
 from funcy import partial
+from sqlalchemy.orm.exc import StaleDataError
 
 from redash import models, settings
-from redash.utils.org_resolving import current_org
 from redash.handlers.base import (BaseResource, filter_by_tags, get_object_or_404,
                                   org_scoped_rule, paginate, routes, order_results as _order_results)
 from redash.handlers.query_results import run_query
+from redash.models.parameterized_query import ParameterizedQuery
 from redash.permissions import (can_modify, not_view_only, require_access,
                                 require_admin_or_owner,
                                 require_object_modify_permission,
                                 require_permission, view_only)
-from redash.utils import collect_parameters_from_request
 from redash.serializers import QuerySerializer
-from redash.models.parameterized_query import ParameterizedQuery
-
+from redash.utils import collect_parameters_from_request
+from redash.utils.org_resolving import current_org
 
 # Ordering map for relationships
 order_map = {
@@ -185,6 +184,7 @@ def require_access_to_dropdown_queries(user, query_def):
 
         require_access(dict(groups), user, view_only)
 
+
 class QueryListResource(BaseQueryListResource):
     @require_permission('create_query')
     def post(self):
@@ -326,7 +326,8 @@ class QueryResource(BaseResource):
         require_object_modify_permission(query, self.current_user)
         require_access_to_dropdown_queries(self.current_user, query_def)
 
-        for field in ['id', 'created_at', 'api_key', 'visualizations', 'latest_query_data', 'user', 'last_modified_by', 'org']:
+        for field in ['id', 'created_at', 'api_key', 'visualizations', 'latest_query_data', 'user', 'last_modified_by',
+                      'org']:
             query_def.pop(field, None)
 
         if 'query' in query_def:

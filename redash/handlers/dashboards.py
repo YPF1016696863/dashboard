@@ -1,7 +1,8 @@
 from flask import request, url_for
-from funcy import project, partial
-
 from flask_restful import abort
+from funcy import project, partial
+from sqlalchemy.orm.exc import StaleDataError
+
 from redash import models, serializers
 from redash.handlers.base import (BaseResource, get_object_or_404, paginate,
                                   filter_by_tags,
@@ -11,8 +12,6 @@ from redash.permissions import (can_modify, require_admin_or_owner,
                                 require_permission)
 from redash.security import csp_allows_embeding
 from redash.serializers import serialize_dashboard
-from sqlalchemy.orm.exc import StaleDataError
-
 
 # Ordering map for relationships
 order_map = {
@@ -151,7 +150,8 @@ class DashboardResource(BaseResource):
 
         api_key = models.ApiKey.get_by_object(dashboard)
         if api_key:
-            response['public_url'] = url_for('redash.public_dashboard', token=api_key.api_key, org_slug=self.current_org.slug, _external=True)
+            response['public_url'] = url_for('redash.public_dashboard', token=api_key.api_key,
+                                             org_slug=self.current_org.slug, _external=True)
             response['api_key'] = api_key.api_key
 
         response['can_edit'] = can_modify(dashboard, self.current_user)
@@ -269,7 +269,8 @@ class DashboardShareResource(BaseResource):
         models.db.session.flush()
         models.db.session.commit()
 
-        public_url = url_for('redash.public_dashboard', token=api_key.api_key, org_slug=self.current_org.slug, _external=True)
+        public_url = url_for('redash.public_dashboard', token=api_key.api_key, org_slug=self.current_org.slug,
+                             _external=True)
 
         self.record_event({
             'action': 'activate_api_key',
@@ -324,7 +325,8 @@ class DashboardFavoriteListResource(BaseResource):
         search_term = request.args.get('q')
 
         if search_term:
-            base_query = models.Dashboard.search(self.current_org, self.current_user.group_ids, self.current_user.id, search_term)
+            base_query = models.Dashboard.search(self.current_org, self.current_user.group_ids, self.current_user.id,
+                                                 search_term)
             favorites = models.Dashboard.favorites(self.current_user, base_query=base_query)
         else:
             favorites = models.Dashboard.favorites(self.current_user)

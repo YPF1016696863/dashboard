@@ -6,6 +6,7 @@ from . import settings
 
 class Redash(Flask):
     """A custom Flask app for Redash"""
+
     def __init__(self, *args, **kwargs):
         kwargs.update({
             'template_folder': settings.STATIC_ASSETS_PATH,

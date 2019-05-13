@@ -1,12 +1,14 @@
-import pystache
 from functools import partial
+from numbers import Number
+
+import pystache
+from dateutil.parser import parse
 from flask_login import current_user
 from flask_restful import abort
-from numbers import Number
-from redash.utils import mustache_render, json_loads
-from redash.permissions import require_access, view_only
 from funcy import distinct
-from dateutil.parser import parse
+
+from redash.permissions import require_access, view_only
+from redash.utils import mustache_render, json_loads
 
 
 def _pluck_name_and_value(default_column, row):

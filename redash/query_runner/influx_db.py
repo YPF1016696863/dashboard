@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from influxdb import InfluxDBClusterClient
+
     enabled = True
 
 except ImportError:

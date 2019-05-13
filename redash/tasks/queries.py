@@ -175,7 +175,8 @@ def refresh_queries():
             elif query.data_source is None:
                 logging.info("Skipping refresh of %s because the datasource is none.", query.id)
             elif query.data_source.paused:
-                logging.info("Skipping refresh of %s because datasource - %s is paused (%s).", query.id, query.data_source.name, query.data_source.pause_reason)
+                logging.info("Skipping refresh of %s because datasource - %s is paused (%s).", query.id,
+                             query.data_source.name, query.data_source.pause_reason)
             else:
                 if query.options and len(query.options.get('parameters', [])) > 0:
                     query_params = {p['name']: p.get('value')
@@ -220,7 +221,8 @@ def cleanup_query_results():
     logging.info("Running query results clean up (removing maximum of %d unused results, that are %d days old or more)",
                  settings.QUERY_RESULTS_CLEANUP_COUNT, settings.QUERY_RESULTS_CLEANUP_MAX_AGE)
 
-    unused_query_results = models.QueryResult.unused(settings.QUERY_RESULTS_CLEANUP_MAX_AGE).limit(settings.QUERY_RESULTS_CLEANUP_COUNT)
+    unused_query_results = models.QueryResult.unused(settings.QUERY_RESULTS_CLEANUP_MAX_AGE).limit(
+        settings.QUERY_RESULTS_CLEANUP_COUNT)
     deleted_count = models.QueryResult.query.filter(
         models.QueryResult.id.in_(unused_query_results.subquery())
     ).delete(synchronize_session=False)
@@ -328,7 +330,8 @@ class QueryExecutor(object):
 
         run_time = time.time() - started_at
 
-        logger.info(u"task=execute_query query_hash=%s data_length=%s error=[%s]", self.query_hash, data and len(data), error)
+        logger.info(u"task=execute_query query_hash=%s data_length=%s error=[%s]", self.query_hash, data and len(data),
+                    error)
 
         _unlock(self.query_hash, self.data_source.id)
 

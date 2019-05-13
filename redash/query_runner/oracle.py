@@ -1,7 +1,7 @@
 import logging
 
-from redash.utils import json_dumps, json_loads
 from redash.query_runner import *
+from redash.utils import json_dumps, json_loads
 
 try:
     import cx_Oracle
@@ -22,12 +22,12 @@ try:
         cx_Oracle.TIMESTAMP: TYPE_DATETIME,
     }
 
-
     ENABLED = True
 except ImportError:
     ENABLED = False
 
 logger = logging.getLogger(__name__)
+
 
 class Oracle(BaseSQLQueryRunner):
     noop_query = "SELECT 1 FROM dual"
@@ -130,7 +130,8 @@ class Oracle(BaseSQLQueryRunner):
 
         if default_type == cx_Oracle.NUMBER:
             if scale <= 0:
-                return cursor.var(cx_Oracle.STRING, 255, outconverter=Oracle._convert_number, arraysize=cursor.arraysize)
+                return cursor.var(cx_Oracle.STRING, 255, outconverter=Oracle._convert_number,
+                                  arraysize=cursor.arraysize)
 
     def run_query(self, query, user):
         connection = cx_Oracle.connect(self.connection_string)
@@ -164,5 +165,6 @@ class Oracle(BaseSQLQueryRunner):
             connection.close()
 
         return json_data, error
+
 
 register(Oracle)

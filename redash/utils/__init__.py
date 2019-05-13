@@ -1,5 +1,6 @@
-import codecs
+import binascii
 import cStringIO
+import codecs
 import csv
 import datetime
 import decimal
@@ -8,17 +9,15 @@ import os
 import random
 import re
 import uuid
-import binascii
-
-from six import string_types
 
 import pystache
 import pytz
 import simplejson
 from funcy import select_values
-from redash import settings
+from six import string_types
 from sqlalchemy.orm.query import Query
 
+from redash import settings
 from .human_time import parse_human_time
 
 COMMENTS_REGEX = re.compile("/\*.*?\*/")

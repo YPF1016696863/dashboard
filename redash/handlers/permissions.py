@@ -1,12 +1,12 @@
 from collections import defaultdict
 
-from redash.handlers.base import BaseResource, get_object_or_404
-from redash.models import AccessPermission, Query, Dashboard, User, db
-from redash.permissions import require_admin_or_owner, ACCESS_TYPES
 from flask import request
 from flask_restful import abort
 from sqlalchemy.orm.exc import NoResultFound
 
+from redash.handlers.base import BaseResource, get_object_or_404
+from redash.models import AccessPermission, Query, Dashboard, User, db
+from redash.permissions import require_admin_or_owner, ACCESS_TYPES
 
 model_to_types = {
     'queries': Query,

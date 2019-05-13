@@ -1,11 +1,12 @@
 from __future__ import print_function
+
 from sys import exit
 
 from click import BOOL, argument, option, prompt
 from flask.cli import AppGroup
 from six import string_types
-from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 
 from redash import models
 from redash.handlers.users import invite_user
@@ -32,7 +33,7 @@ def build_groups(org, groups, is_admin):
 @argument('email')
 @option('--org', 'organization', default='default',
         help="the organization the user belongs to, (leave blank for "
-        "'default').")
+             "'default').")
 def grant_admin(email, organization='default'):
     """
     Grant admin access to user EMAIL.
@@ -58,17 +59,17 @@ def grant_admin(email, organization='default'):
 @argument('name')
 @option('--org', 'organization', default='default',
         help="The organization the user belongs to (leave blank for "
-        "'default').")
+             "'default').")
 @option('--admin', 'is_admin', is_flag=True, default=False,
         help="set user as admin")
 @option('--google', 'google_auth', is_flag=True,
         default=False, help="user uses Google Auth to login")
 @option('--password', 'password', default=None,
         help="Password for users who don't use Google Auth "
-        "(leave blank for prompt).")
+             "(leave blank for prompt).")
 @option('--groups', 'groups', default=None,
         help="Comma separated list of groups (leave blank for "
-        "default).")
+             "default).")
 def create(email, name, groups, is_admin=False, google_auth=False,
            password=None, organization='default'):
     """
@@ -106,7 +107,7 @@ def create(email, name, groups, is_admin=False, google_auth=False,
         default=False, help="user uses Google Auth to login")
 @option('--password', 'password', default=None,
         help="Password for root user who don't use Google Auth "
-        "(leave blank for prompt).")
+             "(leave blank for prompt).")
 def create_root(email, name, google_auth=False, password=None, organization='default'):
     """
     Create root user.
@@ -149,7 +150,7 @@ def create_root(email, name, google_auth=False, password=None, organization='def
 @argument('email')
 @option('--org', 'organization', default=None,
         help="The organization the user belongs to (leave blank for all"
-        " organizations).")
+             " organizations).")
 def delete(email, organization=None):
     """
     Delete user EMAIL.
@@ -172,7 +173,7 @@ def delete(email, organization=None):
 @argument('password')
 @option('--org', 'organization', default=None,
         help="The organization the user belongs to (leave blank for all "
-        "organizations).")
+             "organizations).")
 def password(email, password, organization=None):
     """
     Resets password for EMAIL to PASSWORD.
@@ -233,7 +234,7 @@ def invite(email, name, inviter_email, groups, is_admin=False,
 @manager.command()
 @option('--org', 'organization', default=None,
         help="The organization the user belongs to (leave blank for all"
-        " organizations)")
+             " organizations)")
 def list(organization=None):
     """List all users"""
     if organization:
@@ -246,7 +247,7 @@ def list(organization=None):
             print("-" * 20)
 
         print("Id: {}\nName: {}\nEmail: {}\nOrganization: {}\nActive: {}".format(
-            user.id, user.name.encode('utf-8'), user.email, user.org.name, not(user.is_disabled)))
+            user.id, user.name.encode('utf-8'), user.email, user.org.name, not (user.is_disabled)))
 
         groups = models.Group.query.filter(models.Group.id.in_(user.group_ids)).all()
         group_names = [group.name for group in groups]

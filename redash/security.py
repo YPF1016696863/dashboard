@@ -1,14 +1,13 @@
 import functools
+
 from flask_talisman import talisman
 
 from redash import settings
-
 
 talisman = talisman.Talisman()
 
 
 def csp_allows_embeding(fn):
-
     @functools.wraps(fn)
     def decorated(*args, **kwargs):
         return fn(*args, **kwargs)

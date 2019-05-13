@@ -1,6 +1,5 @@
 import os
 import subprocess
-import sys
 
 from redash.query_runner import *
 

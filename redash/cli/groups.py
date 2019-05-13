@@ -1,9 +1,10 @@
 from __future__ import print_function
+
 from sys import exit
 
-from sqlalchemy.orm.exc import NoResultFound
-from flask.cli import AppGroup
 from click import argument, option
+from flask.cli import AppGroup
+from sqlalchemy.orm.exc import NoResultFound
 
 from redash import models
 
@@ -14,13 +15,13 @@ manager = AppGroup(help="Groups management commands.")
 @argument('name')
 @option('--org', 'organization', default='default',
         help="The organization the user belongs to (leave blank for "
-        "'default').")
+             "'default').")
 @option('--permissions', default=None,
         help="Comma separated list of permissions ('create_dashboard',"
-        " 'create_query', 'edit_dashboard', 'edit_query', "
-        "'view_query', 'view_source', 'execute_query', 'list_users',"
-        " 'schedule_query', 'list_dashboards', 'list_alerts',"
-        " 'list_data_sources') (leave blank for default).")
+             " 'create_query', 'edit_dashboard', 'edit_query', "
+             "'view_query', 'view_source', 'execute_query', 'list_users',"
+             " 'schedule_query', 'list_dashboards', 'list_alerts',"
+             " 'list_data_sources') (leave blank for default).")
 def create(name, permissions=None, organization='default'):
     print("Creating group (%s)..." % (name))
 
@@ -44,10 +45,10 @@ def create(name, permissions=None, organization='default'):
 @argument('group_id')
 @option('--permissions', default=None,
         help="Comma separated list of permissions ('create_dashboard',"
-        " 'create_query', 'edit_dashboard', 'edit_query',"
-        " 'view_query', 'view_source', 'execute_query', 'list_users',"
-        " 'schedule_query', 'list_dashboards', 'list_alerts',"
-        " 'list_data_sources') (leave blank for default).")
+             " 'create_query', 'edit_dashboard', 'edit_query',"
+             " 'view_query', 'view_source', 'execute_query', 'list_users',"
+             " 'schedule_query', 'list_dashboards', 'list_alerts',"
+             " 'list_data_sources') (leave blank for default).")
 def change_permissions(group_id, permissions=None):
     print("Change permissions of group %s ..." % group_id)
 

@@ -9,21 +9,17 @@ from flask import current_app as app, url_for, request_started
 from flask_login import current_user, AnonymousUserMixin, UserMixin
 from passlib.apps import custom_app_context as pwd_context
 from six import python_2_unicode_compatible, string_types, text_type
-from sqlalchemy.exc import DBAPIError
 from sqlalchemy.dialects import postgresql
-
 from sqlalchemy_utils import EmailType
 from sqlalchemy_utils.models import generic_repr
 
 from redash import redis_connection
-from redash.utils import generate_token, utcnow, dt_from_timestamp
-
+from redash.utils import generate_token, dt_from_timestamp
 from .base import db, Column, GFKBase
 from .mixins import TimestampMixin, BelongsToOrgMixin
 from .types import json_cast_property, MutableDict, MutableList
 
 logger = logging.getLogger(__name__)
-
 
 LAST_ACTIVE_KEY = 'users:last_active_at'
 

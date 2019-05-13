@@ -1,10 +1,11 @@
+import datetime
+
 from celery.utils.log import get_task_logger
 from flask import current_app
-import datetime
-from redash.worker import celery
-from redash import utils
-from redash import models, settings
 
+from redash import models, settings
+from redash import utils
+from redash.worker import celery
 
 logger = get_task_logger(__name__)
 

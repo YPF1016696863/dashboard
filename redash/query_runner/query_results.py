@@ -35,8 +35,9 @@ def _load_query(user, query_id):
         raise PermissionError("Query id {} not found.".format(query.id))
 
     if not has_access(query.data_source, user, not_view_only):
-        raise PermissionError(u"You are not allowed to execute queries on {} data source (used for query id {}).".format(
-            query.data_source.name, query.id))
+        raise PermissionError(
+            u"You are not allowed to execute queries on {} data source (used for query id {}).".format(
+                query.data_source.name, query.id))
 
     return query
 

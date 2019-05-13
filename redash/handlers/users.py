@@ -1,21 +1,20 @@
-from flask import request
-from flask_restful import abort
-from flask_login import current_user, login_user
-from funcy import project
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.exc import IntegrityError
 from disposable_email_domains import blacklist
+from flask import request
+from flask_login import current_user, login_user
+from flask_restful import abort
 from funcy import partial
+from funcy import project
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 
 from redash import models, limiter
+from redash import settings
+from redash.handlers.base import BaseResource, require_fields, get_object_or_404, paginate, \
+    order_results as _order_results
 from redash.permissions import require_permission, require_admin_or_owner, is_admin_or_owner, \
     require_permission_or_owner, require_admin
-from redash.handlers.base import BaseResource, require_fields, get_object_or_404, paginate, order_results as _order_results
-
-from redash.utils.account import invite_link_for_user, send_invite_email, send_password_reset_email, send_verify_email
 from redash.settings import parse_boolean
-from redash import settings
-
+from redash.utils.account import invite_link_for_user, send_invite_email, send_password_reset_email, send_verify_email
 
 # Ordering map for relationships
 order_map = {
@@ -50,7 +49,7 @@ def invite_user(org, inviter, user, send_email=True):
 
 class UserListResource(BaseResource):
     decorators = BaseResource.decorators + \
-        [limiter.limit('200/day;50/hour', methods=['POST'])]
+                 [limiter.limit('200/day;50/hour', methods=['POST'])]
 
     def get_users(self, disabled, pending, search_term):
         if disabled:
@@ -192,7 +191,7 @@ class UserRegenerateApiKeyResource(BaseResource):
 
 class UserResource(BaseResource):
     decorators = BaseResource.decorators + \
-        [limiter.limit('50/hour', methods=['POST'])]
+                 [limiter.limit('50/hour', methods=['POST'])]
 
     def get(self, user_id):
         require_permission_or_owner('list_users', user_id)

@@ -16,11 +16,11 @@ try:
     from bson.decimal128 import Decimal128
     from bson.son import SON
     from bson.json_util import object_hook as bson_object_hook
+
     enabled = True
 
 except ImportError:
     enabled = False
-
 
 TYPES_MAP = {
     str: TYPE_STRING,
@@ -155,7 +155,8 @@ class MongoDB(BaseQueryRunner):
 
         self.db_name = self.configuration["dbName"]
 
-        self.is_replica_set = True if "replicaSetName" in self.configuration and self.configuration["replicaSetName"] else False
+        self.is_replica_set = True if "replicaSetName" in self.configuration and self.configuration[
+            "replicaSetName"] else False
 
     def _get_db(self):
         if self.is_replica_set:
@@ -173,8 +174,8 @@ class MongoDB(BaseQueryRunner):
 
     def _merge_property_names(self, columns, document):
         for property in document:
-              if property not in columns:
-                  columns.append(property)
+            if property not in columns:
+                columns.append(property)
 
     def _is_collection_a_view(self, db, collection_name):
         if 'viewOn' in db[collection_name].options():
@@ -219,7 +220,6 @@ class MongoDB(BaseQueryRunner):
                 "name": collection_name, "columns": sorted(columns)}
 
         return schema.values()
-
 
     def run_query(self, query, user):
         db = self._get_db()
@@ -301,12 +301,12 @@ class MongoDB(BaseQueryRunner):
 
         if "count" in query_data:
             columns.append({
-                "name" : "count",
-                "friendly_name" : "count",
-                "type" : TYPE_INTEGER
+                "name": "count",
+                "friendly_name": "count",
+                "type": TYPE_INTEGER
             })
 
-            rows.append({ "count" : cursor })
+            rows.append({"count": cursor})
         else:
             rows, columns = parse_results(cursor)
 
@@ -331,5 +331,6 @@ class MongoDB(BaseQueryRunner):
         json_data = json_dumps(data, cls=MongoDBJSONEncoder)
 
         return json_data, error
+
 
 register(MongoDB)

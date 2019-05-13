@@ -2,9 +2,9 @@ from flask import request
 
 from redash import models
 from redash.handlers.base import BaseResource, get_object_or_404
-from redash.serializers import serialize_visualization
 from redash.permissions import (require_object_modify_permission,
                                 require_permission)
+from redash.serializers import serialize_visualization
 from redash.utils import json_dumps
 
 

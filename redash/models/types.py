@@ -1,12 +1,10 @@
-import pytz
-from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.indexable import index_property
 from sqlalchemy.ext.mutable import Mutable
+from sqlalchemy.types import TypeDecorator
 from sqlalchemy_utils import EncryptedType
 
 from redash.utils import json_dumps, json_loads
 from redash.utils.configuration import ConfigurationContainer
-
 from .base import db
 
 
@@ -25,7 +23,8 @@ class EncryptedConfiguration(EncryptedType):
         return super(EncryptedConfiguration, self).process_bind_param(value.to_json(), dialect)
 
     def process_result_value(self, value, dialect):
-        return ConfigurationContainer.from_json(super(EncryptedConfiguration, self).process_result_value(value, dialect))
+        return ConfigurationContainer.from_json(
+            super(EncryptedConfiguration, self).process_result_value(value, dialect))
 
 
 # XXX replace PseudoJSON and MutableDict with real JSON field

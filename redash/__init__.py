@@ -5,9 +5,9 @@ import urllib
 import urlparse
 
 import redis
-from flask_mail import Mail
 from flask_limiter import Limiter
 from flask_limiter.util import get_ipaddr
+from flask_mail import Mail
 from flask_migrate import Migrate
 from statsd import StatsClient
 
@@ -16,9 +16,9 @@ from .app import create_app  # noqa
 
 __version__ = '7.0.0'
 
-
 if os.environ.get("REMOTE_DEBUG"):
     import ptvsd
+
     ptvsd.enable_attach(address=('0.0.0.0', 5678))
 
 

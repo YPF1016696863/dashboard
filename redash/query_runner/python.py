@@ -3,18 +3,19 @@ import importlib
 import logging
 import sys
 
-from redash.query_runner import *
-from redash.utils import json_dumps, json_loads
-from redash import models
 from RestrictedPython import compile_restricted
 from RestrictedPython.Guards import safe_builtins
 
+from redash import models
+from redash.query_runner import *
+from redash.utils import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 
 
 class CustomPrint(object):
     """CustomPrint redirect "print" calls to be sent as "log" on the result object."""
+
     def __init__(self):
         self.enabled = True
         self.lines = []
@@ -259,12 +260,11 @@ class Python(BaseQueryRunner):
             restricted_globals["TYPE_DATE"] = TYPE_DATE
             restricted_globals["TYPE_FLOAT"] = TYPE_FLOAT
 
-
             # TODO: Figure out the best way to have a timeout on a script
             #       One option is to use ETA with Celery + timeouts on workers
             #       And replacement of worker process every X requests handled.
 
-            exec((code), restricted_globals, self._script_locals)
+            exec ((code), restricted_globals, self._script_locals)
 
             result = self._script_locals['result']
             result['log'] = self._custom_print.lines

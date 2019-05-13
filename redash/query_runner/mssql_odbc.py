@@ -1,6 +1,4 @@
 import logging
-import sys
-import uuid
 
 from redash.query_runner import *
 from redash.query_runner.mssql import types_map
@@ -10,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import pyodbc
+
     enabled = True
 except ImportError:
     enabled = False
@@ -156,5 +155,6 @@ class SQLServerODBC(BaseSQLQueryRunner):
                 connection.close()
 
         return json_data, error
+
 
 register(SQLServerODBC)

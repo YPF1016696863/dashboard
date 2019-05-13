@@ -1,7 +1,7 @@
 import requests
-
 from celery.utils.log import get_task_logger
 from flask_mail import Message
+
 from redash import mail, models, settings
 from redash.models import users
 from redash.version_check import run_version_check
@@ -36,7 +36,8 @@ def version_check():
 
 @celery.task(name="redash.tasks.subscribe")
 def subscribe(form):
-    logger.info("Subscribing to: [security notifications=%s], [newsletter=%s]", form['security_notifications'], form['newsletter'])
+    logger.info("Subscribing to: [security notifications=%s], [newsletter=%s]", form['security_notifications'],
+                form['newsletter'])
     data = {
         'admin_name': form['name'],
         'admin_email': form['email'],

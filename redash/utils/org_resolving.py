@@ -1,6 +1,7 @@
 import logging
 
-from flask import request, g
+from flask import g
+
 from redash.models import Organization
 
 logger = logging.getLogger(__name__)

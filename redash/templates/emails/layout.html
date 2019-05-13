@@ -1,12 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-<meta name="viewport" content="width=device-width">
-<meta name="format-detection" content="telephone=no">
-<title>{{ subject }}</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content="width=device-width" name="viewport">
+    <meta content="telephone=no" name="format-detection">
+    <title>{{ subject }}</title>
 
-<style type="text/css" data-premailer="ignore">
+    <style data-premailer="ignore" type="text/css">
   #outlook a{
     padding: 0;
   }
@@ -40,12 +40,11 @@
     padding: 0;
     width: 100% !important;
   }
-</style>
+
+    </style>
 
 
-
-
-<style type="text/css">
+    <style type="text/css">
   /**
    * Generic
    */
@@ -320,10 +319,11 @@
     text-decoration: none;
 
   }
-</style>
+
+    </style>
 
 
-<style type="text/css" data-premailer="ignore">
+    <style data-premailer="ignore" type="text/css">
   @media screen and (max-width: 595px) {
     body {
       padding: 10px !important;
@@ -385,15 +385,11 @@
     padding-top: 15px;
   }
 
-</style>
+
+    </style>
 
 
-
-
-
-
-
-<style type="text/css">
+    <style type="text/css">
   .intercom-align-right {
   text-align: right !important;
 }
@@ -528,41 +524,48 @@ img.intercom-interblocks-article-author-avatar-image {
   vertical-align: middle;
 }
 
-</style>
 
+    </style>
 
 
 </head>
 
-<body style="background: #f9f9f9; margin: 0px; padding: 20px" bgcolor="f9f9f9">
+<body bgcolor="f9f9f9" style="background: #f9f9f9; margin: 0px; padding: 20px">
 
-  <table cellspacing="0" border="0" cellpadding="0" align="center" width="595" bgcolor="white" class="main" style="border-collapse: separate; border-spacing: 0; font-family: Helvetica, Arial, sans-serif; letter-spacing: 0; table-layout: fixed">
+<table align="center" bgcolor="white" border="0" cellpadding="0" cellspacing="0" class="main" style="border-collapse: separate; border-spacing: 0; font-family: Helvetica, Arial, sans-serif; letter-spacing: 0; table-layout: fixed"
+       width="595">
     <tr>
-      <td class="main-td" style="border: 1px solid #dddddd; border-radius: 2px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05); font-family: Helvetica, Arial, sans-serif; font-size: 16px; padding: 40px 60px">
+        <td class="main-td"
+            style="border: 1px solid #dddddd; border-radius: 2px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05); font-family: Helvetica, Arial, sans-serif; font-size: 16px; padding: 40px 60px">
 
 
+            <table class="header" style="border-collapse: separate; border-spacing: 0; table-layout: fixed"
+                   width="100%">
+                <tr>
+                    <td align="left"
+                        class="logo"
+                        style="font-family: Helvetica, Arial, sans-serif; font-size: 16px; padding: 0; text-align: left">
 
-  <table width="100%" class="header" style="border-collapse: separate; border-spacing: 0; table-layout: fixed">
-    <tr>
-      <td class="logo" style="font-family: Helvetica, Arial, sans-serif; font-size: 16px; padding: 0; text-align: left" align="left">
+                        <img class="featured"
+                             height="86" src="https://uploads.intercomcdn.com/i/o/4065702/d84531c526da5329fd25542a/File1454836961491" style="padding: 15px 0 30px; text-align: left" width="165">
 
-          <img src="https://uploads.intercomcdn.com/i/o/4065702/d84531c526da5329fd25542a/File1454836961491" width="165" height="86" class="featured" style="padding: 15px 0 30px; text-align: left">
+                    </td>
+                </tr>
+            </table>
 
-      </td>
+            <table class="content" style="border-collapse: separate; border-spacing: 0; table-layout: fixed"
+                   width="100%">
+                <tr>
+                    <td class="content-td"
+                        style="color: #525252; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 22px; padding: 0">
+                        {% block content %}
+                        {% endblock %}
+                    </td>
+                </tr>
+            </table>
+
+        </td>
     </tr>
-  </table>
-
-        <table width="100%" class="content" style="border-collapse: separate; border-spacing: 0; table-layout: fixed">
-          <tr>
-            <td class="content-td" style="color: #525252; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 22px; padding: 0">
-                {% block content %}
-                {% endblock %}
-            </td>
-          </tr>
-        </table>
-
-      </td>
-    </tr>
-  </table>
+</table>
 
 </html>

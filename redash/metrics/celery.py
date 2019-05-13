@@ -5,6 +5,7 @@ import socket
 import time
 
 from celery.signals import task_postrun, task_prerun
+
 from redash import settings, statsd_client
 from redash.utils import json_dumps
 

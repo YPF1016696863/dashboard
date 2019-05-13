@@ -3,15 +3,12 @@ from __future__ import absolute_import
 from datetime import timedelta
 from random import randint
 
-from flask import current_app
-
 from celery import Celery
 from celery.schedules import crontab
 from celery.signals import worker_process_init
+from flask import current_app
 
 from redash import create_app, settings
-from redash.metrics import celery as celery_metrics  # noqa
-
 
 celery = Celery('redash',
                 broker=settings.CELERY_BROKER,
@@ -53,7 +50,6 @@ celery.conf.update(result_backend=settings.CELERY_RESULT_BACKEND,
                    worker_log_format=settings.CELERYD_WORKER_LOG_FORMAT,
                    worker_task_log_format=settings.CELERYD_WORKER_TASK_LOG_FORMAT)
 
-
 # Create a new Task base class, that pushes a new Flask app context to allow DB connections if needed.
 TaskBase = celery.Task
 
@@ -74,7 +70,6 @@ celery.Task = ContextTask
 def init_celery_flask_app(**kwargs):
     app = create_app()
     app.app_context().push()
-
 
 # Commented until https://github.com/getredash/redash/issues/3466 is implemented.
 # Hook for extensions to add periodic tasks.

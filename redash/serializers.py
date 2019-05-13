@@ -3,14 +3,12 @@ This will eventually replace all the `to_dict` methods of the different model
 classes we have. This will ensure cleaner code and better
 separation of concerns.
 """
-from funcy import project
-
 from flask_login import current_user
+from funcy import project
 
 from redash import models
 from redash.permissions import has_access, view_only
 from redash.utils import json_loads
-from redash.models.parameterized_query import ParameterizedQuery
 
 
 def public_widget(widget):
@@ -198,7 +196,7 @@ def serialize_dashboard(obj, with_widgets=False, user=None, with_favorite_state=
                 widgets.append(serialize_widget(w))
             else:
                 widget = project(serialize_widget(w),
-                                ('id', 'width', 'dashboard_id', 'options', 'created_at', 'updated_at'))
+                                 ('id', 'width', 'dashboard_id', 'options', 'created_at', 'updated_at'))
                 widget['restricted'] = True
                 widgets.append(widget)
     else:

@@ -1,7 +1,7 @@
 from flask import request
 
+from redash.handlers.base import BaseResource
 from redash.models import db, Organization
-from redash.handlers.base import BaseResource, record_event
 from redash.permissions import require_admin
 from redash.settings.organization import settings as org_settings
 

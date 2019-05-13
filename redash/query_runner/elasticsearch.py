@@ -1,5 +1,4 @@
 import logging
-import sys
 import urllib
 
 import requests
@@ -138,7 +137,7 @@ class BaseElasticSearch(BaseQueryRunner):
                                 mappings[property_name] = ELASTICSEARCH_TYPES_MAPPING[property_type]
                             else:
                                 mappings[property_name] = TYPE_STRING
-                                #raise Exception("Unknown property type: {0}".format(property_type))
+                                # raise Exception("Unknown property type: {0}".format(property_type))
 
         return mappings, error
 
@@ -200,7 +199,8 @@ class BaseElasticSearch(BaseQueryRunner):
         def collect_aggregations(mappings, rows, parent_key, data, row, result_columns, result_columns_index):
             if isinstance(data, dict):
                 for key, value in data.iteritems():
-                    val = collect_aggregations(mappings, rows, parent_key if key == 'buckets' else key, value, row, result_columns, result_columns_index)
+                    val = collect_aggregations(mappings, rows, parent_key if key == 'buckets' else key, value, row,
+                                               result_columns, result_columns_index)
                     if val:
                         row = get_row(rows, row)
                         collect_value(mappings, row, key, val, 'long')
@@ -210,14 +210,16 @@ class BaseElasticSearch(BaseQueryRunner):
                         continue
                     if 'key' in data and len(data.keys()) == 2:
                         key_is_string = 'key_as_string' in data
-                        collect_value(mappings, row, data['key'] if not key_is_string else data['key_as_string'], data[data_key], 'long' if not key_is_string else 'string')
+                        collect_value(mappings, row, data['key'] if not key_is_string else data['key_as_string'],
+                                      data[data_key], 'long' if not key_is_string else 'string')
                     else:
                         return data[data_key]
 
             elif isinstance(data, list):
                 for value in data:
                     result_row = get_row(rows, row)
-                    collect_aggregations(mappings, rows, parent_key, value, result_row, result_columns, result_columns_index)
+                    collect_aggregations(mappings, rows, parent_key, value, result_row, result_columns,
+                                         result_columns_index)
                     if 'doc_count' in value:
                         collect_value(mappings, result_row, 'doc_count', value['doc_count'], 'integer')
                     if 'key' in value:
@@ -349,7 +351,8 @@ class Kibana(BaseElasticSearch):
                 _from = 0
                 while True:
                     query_size = size if limit >= (_from + size) else (limit - _from)
-                    total = self._execute_simple_query(url + "&size={0}".format(query_size), self.auth, _from, mappings, result_fields, result_columns, result_rows)
+                    total = self._execute_simple_query(url + "&size={0}".format(query_size), self.auth, _from, mappings,
+                                                       result_fields, result_columns, result_rows)
                     _from += size
                     if _from >= limit:
                         break
@@ -441,5 +444,5 @@ class ElasticSearch(BaseElasticSearch):
         return json_data, error
 
 
-#register(Kibana)
+# register(Kibana)
 register(ElasticSearch)

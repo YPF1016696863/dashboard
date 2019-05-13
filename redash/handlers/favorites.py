@@ -1,9 +1,8 @@
-from flask import request
 from sqlalchemy.exc import IntegrityError
 
 from redash import models
 from redash.handlers.base import (BaseResource,
-                                  get_object_or_404, paginate)
+                                  get_object_or_404)
 from redash.permissions import require_access, view_only
 
 
@@ -69,7 +68,8 @@ class DashboardFavoriteResource(BaseResource):
 
     def delete(self, object_id):
         dashboard = get_object_or_404(models.Dashboard.get_by_slug_and_org, object_id, self.current_org)
-        models.Favorite.query.filter(models.Favorite.object == dashboard, models.Favorite.user == self.current_user).delete()
+        models.Favorite.query.filter(models.Favorite.object == dashboard,
+                                     models.Favorite.user == self.current_user).delete()
         models.db.session.commit()
         self.record_event({
             'action': 'unfavorite',

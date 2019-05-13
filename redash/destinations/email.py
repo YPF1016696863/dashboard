@@ -1,6 +1,7 @@
 import logging
 
 from flask_mail import Message
+
 from redash import mail, settings
 from redash.destinations import *
 
@@ -51,5 +52,6 @@ class Email(BaseDestination):
             mail.send(message)
         except Exception:
             logging.exception("Mail send error.")
+
 
 register(Email)

@@ -1,8 +1,8 @@
 import sentry_sdk
-from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.celery import CeleryIntegration
-from redash import settings, __version__
+from sentry_sdk.integrations.flask import FlaskIntegration
 
+from redash import settings, __version__
 
 NON_REPORTED_EXCEPTIONS = ['QueryExecutionError']
 

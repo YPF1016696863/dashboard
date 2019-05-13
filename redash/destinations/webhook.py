@@ -1,10 +1,11 @@
 import logging
+
 import requests
 from requests.auth import HTTPBasicAuth
 
 from redash.destinations import *
-from redash.utils import json_dumps
 from redash.serializers import serialize_alert
+from redash.utils import json_dumps
 
 
 class Webhook(BaseDestination):
@@ -36,7 +37,7 @@ class Webhook(BaseDestination):
             data = {
                 'event': 'alert_state_change',
                 'alert': serialize_alert(alert, full=False),
-                'url_base': host 
+                'url_base': host
             }
             headers = {'Content-Type': 'application/json'}
             auth = HTTPBasicAuth(options.get('username'), options.get('password')) if options.get('username') else None

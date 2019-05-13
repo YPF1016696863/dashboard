@@ -1,6 +1,6 @@
-from flask import render_template, safe_join, send_file
-
+from flask import safe_join, send_file
 from flask_login import login_required
+
 from redash import settings
 from redash.handlers import routes
 from redash.handlers.base import org_scoped_rule
