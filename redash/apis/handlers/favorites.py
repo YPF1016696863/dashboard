@@ -1,8 +1,8 @@
 from sqlalchemy.exc import IntegrityError
 
 from redash import models
-from redash.handlers.base import (BaseResource,
-                                  get_object_or_404)
+from redash.apis.handlers.base import (BaseResource,
+                                       get_object_or_404)
 from redash.permissions import require_access, view_only
 
 

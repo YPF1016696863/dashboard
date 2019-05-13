@@ -9,7 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from redash import models, limiter
 from redash import settings
-from redash.handlers.base import BaseResource, require_fields, get_object_or_404, paginate, \
+from redash.apis.handlers.base import BaseResource, require_fields, get_object_or_404, paginate, \
     order_results as _order_results
 from redash.permissions import require_permission, require_admin_or_owner, is_admin_or_owner, \
     require_permission_or_owner, require_admin

@@ -2,7 +2,7 @@ from flask import request
 from geoip import geolite2
 from user_agents import parse as parse_ua
 
-from redash.handlers.base import BaseResource, paginate
+from redash.apis.handlers.base import BaseResource, paginate
 from redash.permissions import require_admin
 
 

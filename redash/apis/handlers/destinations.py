@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from redash import models
 from redash.destinations import (destinations,
                                  get_configuration_schema_for_destination_type)
-from redash.handlers.base import BaseResource, require_fields
+from redash.apis.handlers.base import BaseResource, require_fields
 from redash.permissions import require_admin
 from redash.utils.configuration import ConfigurationContainer, ValidationError
 

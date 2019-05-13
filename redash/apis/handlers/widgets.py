@@ -1,7 +1,7 @@
 from flask import request
 
 from redash import models
-from redash.handlers.base import BaseResource
+from redash.apis.handlers.base import BaseResource
 from redash.permissions import (require_access,
                                 require_object_modify_permission,
                                 require_permission, view_only)

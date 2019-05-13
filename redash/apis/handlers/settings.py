@@ -1,6 +1,6 @@
 from flask import request
 
-from redash.handlers.base import BaseResource
+from redash.apis.handlers.base import BaseResource
 from redash.models import db, Organization
 from redash.permissions import require_admin
 from redash.settings.organization import settings as org_settings

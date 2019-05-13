@@ -2,8 +2,8 @@ from flask import request
 from funcy import project
 
 from redash import models
-from redash.handlers.base import (BaseResource, require_fields,
-                                  get_object_or_404)
+from redash.apis.handlers.base import (BaseResource, require_fields,
+                                       get_object_or_404)
 from redash.permissions import require_admin_or_owner
 
 

@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import abort
 
 from redash import models
-from redash.handlers.base import BaseResource, get_object_or_404
+from redash.apis.handlers.base import BaseResource, get_object_or_404
 from redash.permissions import require_admin, require_permission
 
 

@@ -3,7 +3,7 @@ from flask_login import current_user
 from flask_restful import abort
 
 from redash import models, settings
-from redash.handlers.base import BaseResource, get_object_or_404
+from redash.apis.handlers.base import BaseResource, get_object_or_404
 from redash.models.parameterized_query import ParameterizedQuery, InvalidParameterError, dropdown_values
 from redash.permissions import (has_access, not_view_only, require_access,
                                 require_permission, view_only)

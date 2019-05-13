@@ -4,9 +4,9 @@ from funcy import partial
 from sqlalchemy.orm.exc import StaleDataError
 
 from redash import models
-from redash.handlers.base import (BaseResource, filter_by_tags, get_object_or_404,
-                                  paginate, order_results as _order_results)
-from redash.handlers.query_results import run_query
+from redash.apis.handlers.base import (BaseResource, filter_by_tags, get_object_or_404,
+                                       paginate, order_results as _order_results)
+from redash.apis.handlers.query_results import run_query
 from redash.models.parameterized_query import ParameterizedQuery
 from redash.permissions import (can_modify, not_view_only, require_access,
                                 require_admin_or_owner,
