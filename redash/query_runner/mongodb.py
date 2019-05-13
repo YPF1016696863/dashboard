@@ -5,7 +5,7 @@ import re
 from dateutil.parser import parse
 
 from redash.query_runner import *
-from redash.utils import JSONEncoder, json_dumps, json_loads, parse_human_time
+from redash.utils import JSONEncoder, json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 
@@ -60,9 +60,6 @@ def datetime_parser(dct):
             m = date_regex.findall(v)
             if len(m) > 0:
                 dct[k] = parse(m[0], yearfirst=True)
-
-    if '$humanTime' in dct:
-        return parse_human_time(dct['$humanTime'])
 
     if '$oids' in dct:
         return parse_oids(dct['$oids'])

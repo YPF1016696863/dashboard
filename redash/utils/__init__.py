@@ -18,7 +18,6 @@ from six import string_types
 from sqlalchemy.orm.query import Query
 
 from redash import settings
-from .human_time import parse_human_time
 
 COMMENTS_REGEX = re.compile("/\*.*?\*/")
 WRITER_ENCODING = os.environ.get('REDASH_CSV_WRITER_ENCODING', 'utf-8')

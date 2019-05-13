@@ -26,9 +26,7 @@ def create_app():
     from .metrics import request as request_metrics
     from .models import db, users
     from .query_runner import import_query_runners
-    from .utils import sentry
 
-    sentry.init()
     app = Redash()
 
     # Load query runners and destinations
