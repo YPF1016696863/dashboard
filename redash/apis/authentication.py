@@ -1,11 +1,9 @@
 import logging
 
 from flask import g, request
-from flask_login import LoginManager, current_user, login_required, logout_user
-from flask_login import login_user
+from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 
-from redash import limiter, models
-from redash import settings
+from redash import limiter, models, settings
 from redash.apis import routes, json_response, json_response_with_status
 from redash.models import Group, Organization, User, db
 from redash.utils.client_config import client_config

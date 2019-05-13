@@ -4,8 +4,7 @@ from flask_login import login_required
 
 from redash import models, redis_connection
 from redash.apis import routes, json_response
-from redash.monitor import celery_tasks
-from redash.monitor import get_status
+from redash.monitor import celery_tasks, get_status
 from redash.permissions import require_super_admin
 from redash.serializers import QuerySerializer
 from redash.utils import json_loads

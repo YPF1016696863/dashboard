@@ -8,7 +8,7 @@ from redash.apis import routes
 
 @routes.route('/api/queries/format', methods=['POST'])
 @login_required
-def format_sql_query(org_slug=None):
+def format_sql_query():
     """
     Formats an SQL query using the Python ``sqlparse`` formatter.
 

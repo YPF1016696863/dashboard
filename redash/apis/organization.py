@@ -7,7 +7,7 @@ from redash.utils.org_resolving import current_org
 
 @routes.route('/api/organization/status', methods=['GET'])
 @login_required
-def organization_status(org_slug=None):
+def organization_status():
     counters = {
         'users': models.User.all(current_org).count(),
         'alerts': models.Alert.all(group_ids=current_user.group_ids).count(),

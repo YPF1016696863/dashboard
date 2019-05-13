@@ -23,7 +23,6 @@ class Redash(Flask):
 def create_app():
     from . import extensions, apis, limiter, mail, migrate, security
     from .destinations import import_destinations
-    from .handlers.webpack import configure_webpack
     from .metrics import request as request_metrics
     from .models import db, users
     from .query_runner import import_query_runners
@@ -47,7 +46,6 @@ def create_app():
     mail.init_app(app)
     limiter.init_app(app)
     apis.init_app(app)
-    configure_webpack(app)
     extensions.init_app(app)
     users.init_app(app)
 
