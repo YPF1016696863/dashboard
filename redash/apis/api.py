@@ -1,8 +1,11 @@
+from flask import make_response
 from flask_restful import Api
+from werkzeug.wrappers import Response
 
 from redash.handlers.alerts import (AlertListResource, AlertResource,
                                     AlertSubscriptionListResource,
                                     AlertSubscriptionResource)
+from redash.handlers.base import org_scoped_rule
 from redash.handlers.dashboards import (DashboardFavoriteListResource,
                                         DashboardListResource,
                                         DashboardResource,
@@ -48,17 +51,20 @@ from redash.handlers.users import (UserDisableResource, UserInviteResource,
 from redash.handlers.visualizations import (VisualizationListResource,
                                             VisualizationResource)
 from redash.handlers.widgets import WidgetListResource, WidgetResource
+from redash.utils import json_dumps
+
 
 api = Api()
 
-# @api.representation('application/json')
-# def json_representation(data, code, headers=None):
-#     # Flask-Restful checks only for flask.Response but flask-login uses werkzeug.wrappers.Response
-#     if isinstance(data, Response):
-#         return data
-#     resp = make_response(json_dumps(data), code)
-#     resp.headers.extend(headers or {})
-#     return resp
+
+@api.representation('application/json')
+def json_representation(data, code, headers=None):
+    # Flask-Restful checks only for flask.Response but flask-login uses werkzeug.wrappers.Response
+    if isinstance(data, Response):
+        return data
+    resp = make_response(json_dumps(data), code)
+    resp.headers.extend(headers or {})
+    return resp
 
 
 api.add_resource(AlertResource, '/api/alerts/<alert_id>', endpoint='alert')
