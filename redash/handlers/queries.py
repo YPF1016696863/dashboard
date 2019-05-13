@@ -1,13 +1,12 @@
-import sqlparse
-from flask import jsonify, request, url_for
-from flask_login import login_required
+from flask import request, url_for
+from flask import request, url_for
 from flask_restful import abort
 from funcy import partial
 from sqlalchemy.orm.exc import StaleDataError
 
-from redash import models, settings
+from redash import models
 from redash.handlers.base import (BaseResource, filter_by_tags, get_object_or_404,
-                                  org_scoped_rule, paginate, routes, order_results as _order_results)
+                                  paginate, order_results as _order_results)
 from redash.handlers.query_results import run_query
 from redash.models.parameterized_query import ParameterizedQuery
 from redash.permissions import (can_modify, not_view_only, require_access,
@@ -39,21 +38,6 @@ order_results = partial(
     default_order='-created_at',
     allowed_orders=order_map,
 )
-
-
-@routes.route(org_scoped_rule('/api/queries/format'), methods=['POST'])
-@login_required
-def format_sql_query(org_slug=None):
-    """
-    Formats an SQL query using the Python ``sqlparse`` formatter.
-
-    :<json string query: The SQL text to format
-    :>json string query: Formatted SQL text
-    """
-    arguments = request.get_json(force=True)
-    query = arguments.get("query", "")
-
-    return jsonify({'query': sqlparse.format(query, **settings.SQLPARSE_FORMAT_OPTIONS)})
 
 
 class QuerySearchResource(BaseResource):

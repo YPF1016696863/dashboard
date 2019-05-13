@@ -4,9 +4,8 @@ from flask import request
 from flask_login import current_user, login_required
 
 from redash import models
-from redash.handlers import routes
 from redash.handlers.base import (get_object_or_404, org_scoped_rule,
-                                  record_event)
+                                  record_event, routes)
 from redash.handlers.static import render_index
 from redash.security import csp_allows_embeding
 from redash.utils.org_resolving import current_org
