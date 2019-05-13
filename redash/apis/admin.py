@@ -3,9 +3,10 @@ import logging
 from flask_login import login_required
 
 from redash import models, redis_connection
-from redash.handlers import routes
 from redash.handlers.base import json_response
+from redash.handlers.base import routes
 from redash.monitor import celery_tasks
+from redash.monitor import get_status
 from redash.permissions import require_super_admin
 from redash.serializers import QuerySerializer
 from redash.utils import json_loads
@@ -44,3 +45,11 @@ def queries_tasks():
     }
 
     return json_response(response)
+
+
+@routes.route('/api/status')
+@login_required
+@require_super_admin
+def status_api():
+    status = get_status()
+    return json_response(status)
