@@ -1,8 +1,7 @@
 from flask_login import current_user, login_required
 
 from redash import models
-from redash.apis import routes
-from redash.handlers.base import json_response
+from redash.apis import routes, json_response
 from redash.utils.org_resolving import current_org
 
 

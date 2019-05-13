@@ -1,7 +1,6 @@
-import time
 from inspect import isclass
 
-from flask import current_app, request
+from flask import request
 from flask_login import current_user, login_required
 from flask_restful import Resource, abort
 from sqlalchemy import cast
@@ -9,10 +8,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_utils import sort_query
 
-from redash import settings
 from redash.models import db
-from redash.tasks import record_event as record_event_task
-from redash.utils import json_dumps
 from redash.utils.org_resolving import current_org
 
 
@@ -46,27 +42,28 @@ class BaseResource(Resource):
 
 
 def record_event(org, user, options):
-    if user.is_api_user():
-        options.update({
-            'api_key': user.name,
-            'org_id': org.id
-        })
-    else:
-        options.update({
-            'user_id': user.id,
-            'user_name': user.name,
-            'org_id': org.id
-        })
-
-    options.update({
-        'user_agent': request.user_agent.string,
-        'ip': request.remote_addr
-    })
-
-    if 'timestamp' not in options:
-        options['timestamp'] = int(time.time())
-
-    record_event_task.delay(options)
+    pass
+    # if user.is_api_user():
+    #     options.update({
+    #         'api_key': user.name,
+    #         'org_id': org.id
+    #     })
+    # else:
+    #     options.update({
+    #         'user_id': user.id,
+    #         'user_name': user.name,
+    #         'org_id': org.id
+    #     })
+    #
+    # options.update({
+    #     'user_agent': request.user_agent.string,
+    #     'ip': request.remote_addr
+    # })
+    #
+    # if 'timestamp' not in options:
+    #     options['timestamp'] = int(time.time())
+    #
+    # record_event_task.delay(options)
 
 
 def require_fields(req, fields):
@@ -111,22 +108,6 @@ def paginate(query_set, page, page_size, serializer, **kwargs):
         'page_size': page_size,
         'results': items,
     }
-
-
-def org_scoped_rule(rule):
-    if settings.MULTI_ORG:
-        return "/<org_slug>{}".format(rule)
-
-    return rule
-
-
-def json_response(response):
-    return current_app.response_class(json_dumps(response), mimetype='application/json')
-
-
-def json_response_with_status(response, status):
-    return current_app.response_class(json_dumps(response), status=status, mimetype='application/json')
-
 
 def filter_by_tags(result_set, column):
     if request.args.getlist('tags'):

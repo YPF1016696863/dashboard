@@ -1,7 +1,6 @@
 import logging
 
-from redash.apis import routes
-from redash.handlers.base import json_response
+from redash.apis import routes, json_response
 from redash.utils.client_config import client_config
 from redash.utils.org_resolving import current_org
 
