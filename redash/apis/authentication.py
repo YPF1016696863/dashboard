@@ -6,8 +6,8 @@ from flask_login import login_user
 
 from redash import limiter, models
 from redash import settings
+from redash.apis import routes
 from redash.handlers.base import json_response, json_response_with_status
-from redash.handlers.base import routes
 from redash.models import Group, Organization, User, db
 from redash.utils.client_config import client_config
 from redash.utils.org_resolving import current_org

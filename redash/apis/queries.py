@@ -3,10 +3,10 @@ from flask import jsonify, request
 from flask_login import login_required
 
 from redash import settings
-from redash.handlers.base import (org_scoped_rule, routes)
+from redash.apis import routes
 
 
-@routes.route(org_scoped_rule('/api/queries/format'), methods=['POST'])
+@routes.route('/api/queries/format', methods=['POST'])
 @login_required
 def format_sql_query(org_slug=None):
     """

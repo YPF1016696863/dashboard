@@ -2,7 +2,7 @@ from flask import safe_join, send_file
 from flask_login import login_required
 
 from redash import settings
-from redash.handlers.base import org_scoped_rule, routes
+from redash.apis import routes
 
 
 def render_index():
@@ -12,8 +12,8 @@ def render_index():
     return response
 
 
-@routes.route(org_scoped_rule('/<path:path>'))
-@routes.route(org_scoped_rule('/'))
+@routes.route('/<path:path>')
+@routes.route('/')
 @login_required
 def index(**kwargs):
     return render_index()

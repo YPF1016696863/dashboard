@@ -1,11 +1,12 @@
 from flask_login import current_user, login_required
 
 from redash import models
-from redash.handlers.base import json_response, org_scoped_rule, routes
+from redash.apis import routes
+from redash.handlers.base import json_response
 from redash.utils.org_resolving import current_org
 
 
-@routes.route(org_scoped_rule('/api/organization/status'), methods=['GET'])
+@routes.route('/api/organization/status', methods=['GET'])
 @login_required
 def organization_status(org_slug=None):
     counters = {
