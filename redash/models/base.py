@@ -32,6 +32,7 @@ db.configure_mappers()
 
 # listen to a few database events to set up functions, trigger updates
 # and indexes for the full text search
+# Simple is a simple configuration, otherwise could be language specific
 make_searchable(options={'regconfig': 'pg_catalog.simple'})
 
 
