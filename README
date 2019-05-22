@@ -1,0 +1,28 @@
+Prepare steps:
+Run all scripts in order in /scripts folder
+
+Other APIs:
+----
+Login
+
+curl -i -X POST \
+   -H "Content-Type:application/json" \
+   -d \
+'{
+  "email":"test@gmail.com",
+  "password":"fcfcfc"
+}' \
+ 'http://localhost:5000/api/login'
+
+Logout
+curl -i -X POST \
+   -H "Content-Type:application/json" \
+   -d \
+'{
+}' \
+ 'http://localhost:5000/api/logout'
+
+MySQL
+docker run --name=datavis_demo_mysql -v /root/mysql_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=rukshani -p 3306:3306 -d --network=demo --network-alias mysql mysql:5.6
+
+Add to datavis network: datavis_server_default
