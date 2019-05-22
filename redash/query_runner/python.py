@@ -6,6 +6,8 @@ import sys
 from RestrictedPython import compile_restricted
 from RestrictedPython.Guards import safe_builtins
 
+from sqlalchemy.orm.exc import NoResultFound
+
 from redash import models
 from redash.query_runner import *
 from redash.utils import json_dumps, json_loads
@@ -164,7 +166,7 @@ class Python(BaseQueryRunner):
                 data_source = models.DataSource.get_by_id(data_source_name_or_id)
             else:
                 data_source = models.DataSource.get_by_name(data_source_name_or_id)
-        except models.NoResultFound:
+        except NoResultFound:
             raise Exception("Wrong data source name/id: %s." % data_source_name_or_id)
 
         # TODO: pass the user here...
@@ -187,7 +189,7 @@ class Python(BaseQueryRunner):
                 data_source = models.DataSource.get_by_id(data_source_name_or_id)
             else:
                 data_source = models.DataSource.get_by_name(data_source_name_or_id)
-        except models.NoResultFound:
+        except NoResultFound:
             raise Exception("Wrong data source name/id: %s." % data_source_name_or_id)
         schema = data_source.query_runner.get_schema()
         return schema
@@ -201,7 +203,7 @@ class Python(BaseQueryRunner):
         """
         try:
             query = models.Query.get_by_id(query_id)
-        except models.NoResultFound:
+        except NoResultFound:
             raise Exception("Query id %s does not exist." % query_id)
 
         if query.latest_query_data is None:

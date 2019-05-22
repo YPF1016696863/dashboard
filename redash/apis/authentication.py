@@ -2,6 +2,8 @@ import logging
 
 from flask import g, request
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
+from sqlalchemy.orm.exc import NoResultFound
+
 
 from redash import limiter, models, settings
 from redash.apis import routes, json_response, json_response_with_status
@@ -116,7 +118,7 @@ def load_user(user_id_with_identity):
             return None
 
         return user
-    except models.NoResultFound:
+    except NoResultFound:
         return None
 
 
