@@ -1,6 +1,12 @@
 # This configuration file is for the **development** setup.
 # For a production example please refer to setup/docker-compose.yml.
-version: '3'
+version: '3.7'
+x-datavis-backend: &datavis-backend
+  image: guwenqing/datavis-backend:latest
+  depends_on:
+    - postgres
+    - redis
+  restart: unless-stopped
 services:
   redis:
     image: redis:3-alpine
@@ -17,11 +23,8 @@ services:
     command: "postgres -c fsync=off -c full_page_writes=off -c synchronous_commit=OFF"
     restart: unless-stopped
   server:
-    image: datavis-backend:latest
+    <<: *datavis-backend
     command: dev_server
-    depends_on:
-      - postgres
-      - redis
     ports:
       - "5000:5000"
       - "5678:5678"
@@ -32,10 +35,8 @@ services:
       REDASH_DATABASE_URL: "postgresql://postgres@postgres/postgres"
       REDASH_RATELIMIT_ENABLED: "false"
   worker:
-    image: datavis-backend:latest
+    <<: *datavis-backend
     command: scheduler
-    depends_on:
-      - server
     environment:
       PYTHONUNBUFFERED: 0
       REDASH_LOG_LEVEL: "INFO"
