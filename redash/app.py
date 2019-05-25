@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from werkzeug.contrib.fixers import ProxyFix
 
 from . import settings
@@ -40,5 +41,7 @@ def create_app():
     apis.init_app(app)
     extensions.init_app(app)
     users.init_app(app)
+
+    CORS(app)
 
     return app
