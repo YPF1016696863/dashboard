@@ -4,7 +4,6 @@ from flask import g, request
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from sqlalchemy.orm.exc import NoResultFound
 
-
 from redash import limiter, models, settings
 from redash.apis import routes, json_response, json_response_with_status
 from redash.models import Group, Organization, User, db
@@ -51,7 +50,9 @@ def setup():
     g.org = default_org
     login_user(user)
 
-    return json_response({})
+    return json_response({
+        'status': 'OK'
+    })
 
 
 @routes.route('/api/login', methods=['POST'])
@@ -62,7 +63,9 @@ def login():
     user = models.User.get_by_email(login_info["email"])
     if user and not user.is_disabled and user.verify_password(login_info['password']):
         login_user(user, remember=("remember" in login_info and login_info["remember"]))
-        return json_response({})
+        return json_response({
+            'status': 'OK'
+        })
     else:
         return json_response_with_status({
             'error': 'LOGIN_FAILED'
@@ -72,7 +75,9 @@ def login():
 @routes.route('/api/logout')
 def logout():
     logout_user()
-    return json_response({})
+    return json_response({
+        'status': 'OK'
+    })
 
 
 def __messages():
