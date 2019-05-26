@@ -1,16 +1,21 @@
 To deploy the server run:
 docker-compose up
 
+Now the db is persistent.
+- to use the demo mysql, copy the mysql_data to /opt/redash
+- postgres db has persistent data also in /opt/redash, so the manual steps below are only needed once if the storage
+  is not deleted.
+
 ----
-Manual steps after (in another shell)
+Manual steps first time (in another shell)
 Run all scripts in order in /scripts folder
 1. setup the db schema
 2. setup the default user
 3. setup the demo db
-docker run --name=datavis_demo_mysql -v /root/mysql_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=rukshani -p 3306:3306 -d --network=demo --network-alias mysql mysql:5.6
 
-if already existed:
-docker network connect datavisserver_default datavis_demo_mysql
+# demo db is now set up as part of the deployment file, the ROOT password used is rukshani, the port is not exposed externally but only part of the network
+To add it manually, use the host name mysql_demo
+
 
 ----
 Other APIs:
