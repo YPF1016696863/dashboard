@@ -42,6 +42,6 @@ def create_app():
     extensions.init_app(app)
     users.init_app(app)
 
-    CORS(app)
+    CORS(app, supports_credentials=True)
 
     return app
