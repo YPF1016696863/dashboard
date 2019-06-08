@@ -122,19 +122,10 @@ class QueryDropdownsResource(BaseResource):
 
 
 class QueryResultResource(BaseResource):
-    @staticmethod
-    def add_cors_headers(headers):
-        if 'Origin' in request.headers:
-            origin = request.headers['Origin']
-
-            if set(['*', origin]) & settings.ACCESS_CONTROL_ALLOW_ORIGIN:
-                headers['Access-Control-Allow-Origin'] = origin
-                headers['Access-Control-Allow-Credentials'] = str(settings.ACCESS_CONTROL_ALLOW_CREDENTIALS).lower()
 
     @require_permission('view_query')
     def options(self, query_id=None, query_result_id=None, filetype='json'):
         headers = {}
-        self.add_cors_headers(headers)
 
         if settings.ACCESS_CONTROL_REQUEST_METHOD:
             headers['Access-Control-Request-Method'] = settings.ACCESS_CONTROL_REQUEST_METHOD
@@ -248,9 +239,6 @@ class QueryResultResource(BaseResource):
                 response = self.make_excel_response(query_result)
             else:
                 response = self.make_csv_response(query_result)
-
-            if len(settings.ACCESS_CONTROL_ALLOW_ORIGIN) > 0:
-                self.add_cors_headers(response.headers)
 
             if should_cache:
                 response.headers.add_header('Cache-Control', 'private,max-age=%d' % ONE_YEAR)
