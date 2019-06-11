@@ -38,22 +38,25 @@ class Mysql(BaseSQLQueryRunner):
             'properties': {
                 'host': {
                     'type': 'string',
-                    'default': '127.0.0.1'
+                    'default': '127.0.0.1',
+                    'title': '#host'
                 },
                 'user': {
-                    'type': 'string'
+                    'type': 'string',
+                    'title': '#user'
                 },
                 'passwd': {
                     'type': 'string',
-                    'title': 'Password'
+                    'title': '#password'
                 },
                 'db': {
                     'type': 'string',
-                    'title': 'Database name'
+                    'title': '#database_name'
                 },
                 'port': {
                     'type': 'number',
                     'default': 3306,
+                    'title': '#port'
                 }
             },
             "order": ['host', 'port', 'user', 'passwd', 'db'],
@@ -65,19 +68,19 @@ class Mysql(BaseSQLQueryRunner):
             schema['properties'].update({
                 'use_ssl': {
                     'type': 'boolean',
-                    'title': 'Use SSL'
+                    'title': '#use_ssl'
                 },
                 'ssl_cacert': {
                     'type': 'string',
-                    'title': 'Path to CA certificate file to verify peer against (SSL)'
+                    'title': '#path_to_ssl_cacert'
                 },
                 'ssl_cert': {
                     'type': 'string',
-                    'title': 'Path to client certificate file (SSL)'
+                    'title': '#path_to_ssl_cert'
                 },
                 'ssl_key': {
                     'type': 'string',
-                    'title': 'Path to private key file (SSL)'
+                    'title': '#path_to_ssl_key'
                 }
             })
 
@@ -85,7 +88,7 @@ class Mysql(BaseSQLQueryRunner):
 
     @classmethod
     def name(cls):
-        return "MySQL"
+        return "#mysql_name"
 
     @classmethod
     def enabled(cls):
