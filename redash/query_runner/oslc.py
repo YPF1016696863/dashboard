@@ -7,6 +7,10 @@ class Oslc(BaseHTTPQueryRunner):
     requires_url = True
     url_title = 'OSLC Adapter ROOT URL'
 
+    def __init__(self, configuration):
+        super(Oslc, self).__init__(configuration)
+        self.syntax = 'json'
+
     @classmethod
     def annotate_query(cls):
         return False
