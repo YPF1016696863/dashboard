@@ -72,7 +72,7 @@ def login():
         }, 401)
 
 
-@routes.route('/api/logout')
+@routes.route('/api/logout', methods=['POST'])
 def logout():
     logout_user()
     return json_response({
