@@ -237,19 +237,23 @@ ACCESS_CONTROL_ALLOW_HEADERS = os.environ.get("REDASH_CORS_ACCESS_CONTROL_ALLOW_
 
 # Query Runners
 default_query_runners = [
-    'redash.query_runner.graphite',
-    'redash.query_runner.mongodb',
-    'redash.query_runner.mysql',
-    'redash.query_runner.pg',
-    'redash.query_runner.url',
-    'redash.query_runner.influx_db',
     'redash.query_runner.elasticsearch',
+    'redash.query_runner.graphite',
     'redash.query_runner.hive_ds',
-    'redash.query_runner.sqlite',
-    'redash.query_runner.mssql',
+    'redash.query_runner.influx_db',
     'redash.query_runner.jql',
-    'redash.query_runner.query_results',
+    'redash.query_runner.mongodb',
+    'redash.query_runner.mssql',
+    'redash.query_runner.mysql',
+#    'redash.query_runner.oracle',
+    'redash.query_runner.oslc',
+    'redash.query_runner.pg',
     'redash.query_runner.prometheus',
+#    'redash.query_runner.python',
+    'redash.query_runner.query_results',
+#    'redash.query_runner.script',
+    'redash.query_runner.sqlite',
+    'redash.query_runner.url'
 ]
 
 enabled_query_runners = array_from_string(
