@@ -16,12 +16,6 @@ from .app import create_app  # noqa
 
 __version__ = '7.0.0'
 
-if os.environ.get("REMOTE_DEBUG"):
-    import ptvsd
-
-    ptvsd.enable_attach(address=('0.0.0.0', 5678))
-
-
 def setup_logging():
     handler = logging.StreamHandler(sys.stdout if settings.LOG_STDOUT else sys.stderr)
     formatter = logging.Formatter(settings.LOG_FORMAT)
