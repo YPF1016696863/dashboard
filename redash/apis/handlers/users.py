@@ -14,7 +14,8 @@ from redash.apis.handlers.base import BaseResource, require_fields, get_object_o
 from redash.permissions import require_permission, require_admin_or_owner, is_admin_or_owner, \
     require_permission_or_owner, require_admin
 from redash.settings import parse_boolean
-from redash.utils.account import invite_link_for_user, send_invite_email, send_password_reset_email, send_verify_email
+from redash.utils.account import invite_link_for_user, reset_link_for_user, verify_link_for_user, \
+    send_invite_email, send_password_reset_email, send_verify_email, validate_token, SignatureExpired, BadSignature
 
 # Ordering map for relationships
 order_map = {
@@ -35,16 +36,45 @@ order_results = partial(
 )
 
 
-def invite_user(org, inviter, user, send_email=True):
+def invite_user(inviter, user, send_email=True):
     d = user.to_dict()
 
     invite_url = invite_link_for_user(user)
     if settings.email_server_is_configured() and send_email:
-        send_invite_email(inviter, user, invite_url, org)
+        send_invite_email(inviter, user, invite_url)
     else:
         d['invite_link'] = invite_url
 
     return d
+
+
+def verify_token(token):
+    try:
+        user_id = validate_token(token)
+        user = models.User.get_by_id_and_org(user_id, self.current_org)
+    except (SignatureExpired, BadSignature, NoResultFound):
+        abort(403, message="Bad token or user id not found in token!")
+
+    return user
+
+
+def reset_password_with_token(token, invite_flag=False):
+    user = verify_token(token)
+
+    if invite_flag and not user.details.get('is_invitation_pending'):
+        abort(400, message='Invitation already accepted!')
+
+    req = request.get_json(force=True)
+    require_fields(req, 'password')
+    if len(request['password']) < 6:
+        abort(400, message='Bad password.')
+
+    if invite_flag:
+        user.is_invitation_pending = False
+
+    user.hash_password(request['password'])
+    models.db.session.add(user)
+    models.db.session.commit()
 
 
 class UserListResource(BaseResource):
@@ -146,14 +176,14 @@ class UserListResource(BaseResource):
         })
 
         should_send_invitation = 'no_invite' not in request.args
-        return invite_user(self.current_org, self.current_user, user, send_email=should_send_invitation)
+        return invite_user(self.current_user, user, send_email=should_send_invitation)
 
 
 class UserInviteResource(BaseResource):
     @require_admin
     def post(self, user_id):
         user = models.User.get_by_id_and_org(user_id, self.current_org)
-        return invite_user(self.current_org, self.current_user, user)
+        return invite_user(self.current_user, user)
 
 
 class UserResetPasswordResource(BaseResource):
@@ -162,10 +192,76 @@ class UserResetPasswordResource(BaseResource):
         user = models.User.get_by_id_and_org(user_id, self.current_org)
         if user.is_disabled:
             abort(404, message='Not found')
-        reset_link = send_password_reset_email(user)
+
+        reset_link = reset_link_for_user(user)
+        email_sent = False
+
+        if settings.email_server_is_configured():
+            send_password_reset_email(user, reset_link)
+            email_sent = True
 
         return {
             'reset_link': reset_link,
+            'email_sent': email_sent
+        }
+
+
+class UserVerifyEmailResource(BaseResource):
+    def post(self, user_id):
+        user = models.User.get_by_id_and_org(user_id, self.current_org)
+        if user.is_disabled:
+            abort(404, message='Not found')
+
+        verify_link = verify_link_for_user(user)
+        email_sent = False
+
+        if settings.email_server_is_configured():
+            send_verify_email(user, verify_link)
+            email_sent = True
+
+        return {
+            'verify_link': verify_link,
+            'email_sent': email_sent
+        }
+
+
+class UserVerifyTokenResource(BaseResource):
+    def post(self, token):
+        user = verify_token(token)
+        return {
+            'status': 'OK',
+            'user_id': user.id
+        }
+
+
+class UserAcceptInvitationWithTokenResource(BaseResource):
+    def post(self, token):
+        reset_password_with_token(token, True)
+
+        return {
+            'status': 'OK',
+        }
+
+
+class UserResetPasswordWithTokenResource(BaseResource):
+    def post(self, token):
+        reset_password_with_token(token, False)
+
+        return {
+            'status': 'OK',
+        }
+
+
+class UserVerifyEmailWithTokenResource(BaseResource):
+    def post(self, token):
+        user = verify_token(token)
+
+        user.is_email_verified = True
+        models.db.session.add(user)
+        models.db.session.commit()
+
+        return {
+            'status': 'OK',
         }
 
 
@@ -252,7 +348,7 @@ class UserResource(BaseResource):
             models.db.session.commit()
 
             if needs_to_verify_email:
-                send_verify_email(user, self.current_org)
+                send_verify_email(user)
 
             # The user has updated their email or password. This should invalidate all _other_ sessions,
             # forcing them to log in again. Since we don't want to force _this_ session to have to go

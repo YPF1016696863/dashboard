@@ -6,11 +6,11 @@ from redash.apis.handlers.alerts import (AlertListResource, AlertResource,
                                          AlertSubscriptionListResource,
                                          AlertSubscriptionResource)
 from redash.apis.handlers.dashboards import (DashboardFavoriteListResource,
-                                  DashboardListResource,
-                                  DashboardResource,
-                                  DashboardShareResource,
-                                  DashboardTagsResource,
-                                  PublicDashboardResource)
+                                             DashboardListResource,
+                                             DashboardResource,
+                                             DashboardShareResource,
+                                             DashboardTagsResource,
+                                             PublicDashboardResource)
 from redash.apis.handlers.data_sources import (DataSourceListResource,
                                                DataSourcePauseResource,
                                                DataSourceResource,
@@ -46,12 +46,17 @@ from redash.apis.handlers.settings import OrganizationSettings
 from redash.apis.handlers.users import (UserDisableResource, UserInviteResource,
                                         UserListResource,
                                         UserRegenerateApiKeyResource,
-                                        UserResetPasswordResource, UserResource)
+                                        UserResetPasswordResource,
+                                        UserVerifyEmailResource,
+                                        UserVerifyTokenResource,
+                                        UserAcceptInvitationWithTokenResource,
+                                        UserResetPasswordWithTokenResource,
+                                        UserVerifyEmailWithTokenResource,
+                                        UserResource)
 from redash.apis.handlers.visualizations import (VisualizationListResource,
                                                  VisualizationResource)
 from redash.apis.handlers.widgets import WidgetListResource, WidgetResource
 from redash.utils import json_dumps
-
 
 api = Api()
 
@@ -135,11 +140,17 @@ api.add_resource(UserListResource, '/api/users', endpoint='users')
 api.add_resource(UserResource, '/api/users/<user_id>', endpoint='user')
 api.add_resource(UserInviteResource, '/api/users/<user_id>/invite', endpoint='user_invite')
 api.add_resource(UserResetPasswordResource, '/api/users/<user_id>/reset_password', endpoint='user_reset_password')
-api.add_resource(UserRegenerateApiKeyResource,
-                 '/api/users/<user_id>/regenerate_api_key',
+api.add_resource(UserRegenerateApiKeyResource, '/api/users/<user_id>/regenerate_api_key',
                  endpoint='user_regenerate_api_key')
 api.add_resource(UserDisableResource, '/api/users/<user_id>/disable', endpoint='user_disable')
-
+api.add_resource(UserVerifyEmailResource, '/api/users/<user_id>/verify_email', endpoint='user_verify_email')
+api.add_resource(UserVerifyTokenResource, '/api/users/verify_token/<token>', endpoint='user_verify_token')
+api.add_resource(UserAcceptInvitationWithTokenResource, '/api/users/accept_invitation/<token>',
+                 endpoint='user_accept_invitation_with_token')
+api.add_resource(UserResetPasswordWithTokenResource, '/api/users/reset_password/<token>',
+                 endpoint='user_reset_password_with_token')
+api.add_resource(UserVerifyEmailWithTokenResource, '/api/users/verify_email/<token>',
+                 endpoint='user_verify_email_with_token')
 api.add_resource(VisualizationListResource, '/api/visualizations', endpoint='visualizations')
 api.add_resource(VisualizationResource, '/api/visualizations/<visualization_id>', endpoint='visualization')
 
