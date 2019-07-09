@@ -16,7 +16,7 @@ def json_response_with_status(response, status):
 
 
 def init_app(app):
-    from redash.apis import admin, authentication, config, queries, static, organization
+    from redash.apis import admin, authentication, config, queries, organization
     app.register_blueprint(routes)
     api.init_app(app)
     authentication.init_app(app)
