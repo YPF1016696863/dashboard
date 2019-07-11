@@ -51,7 +51,7 @@ def invite_user(inviter, user, send_email=True):
 def verify_token(token):
     try:
         user_id = validate_token(token)
-        user = models.User.get_by_id_and_org(user_id, self.current_org)
+        user = models.User.get_by_id(user_id)
     except (SignatureExpired, BadSignature, NoResultFound):
         abort(403, message="Bad token or user id not found in token!")
 
@@ -65,14 +65,15 @@ def reset_password_with_token(token, invite_flag=False):
         abort(400, message='Invitation already accepted!')
 
     req = request.get_json(force=True)
-    require_fields(req, 'password')
-    if len(request['password']) < 6:
+    require_fields(req, ['password'])
+    if len(req['password']) < 6:
         abort(400, message='Bad password.')
 
     if invite_flag:
         user.is_invitation_pending = False
+        user.is_email_verified = True
 
-    user.hash_password(request['password'])
+    user.hash_password(req['password'])
     models.db.session.add(user)
     models.db.session.commit()
 
@@ -182,14 +183,14 @@ class UserListResource(BaseResource):
 class UserInviteResource(BaseResource):
     @require_admin
     def post(self, user_id):
-        user = models.User.get_by_id_and_org(user_id, self.current_org)
+        user = models.User.get_by_id(user_id)
         return invite_user(self.current_user, user)
 
 
 class UserResetPasswordResource(BaseResource):
     @require_admin
     def post(self, user_id):
-        user = models.User.get_by_id_and_org(user_id, self.current_org)
+        user = models.User.get_by_id(user_id)
         if user.is_disabled:
             abort(404, message='Not found')
 
@@ -208,7 +209,7 @@ class UserResetPasswordResource(BaseResource):
 
 class UserVerifyEmailResource(BaseResource):
     def post(self, user_id):
-        user = models.User.get_by_id_and_org(user_id, self.current_org)
+        user = models.User.get_by_id(user_id)
         if user.is_disabled:
             abort(404, message='Not found')
 
@@ -267,7 +268,7 @@ class UserVerifyEmailWithTokenResource(BaseResource):
 
 class UserRegenerateApiKeyResource(BaseResource):
     def post(self, user_id):
-        user = models.User.get_by_id_and_org(user_id, self.current_org)
+        user = models.User.get_by_id(user_id)
         if user.is_disabled:
             abort(404, message='Not found')
         if not is_admin_or_owner(user_id):
@@ -291,7 +292,10 @@ class UserResource(BaseResource):
 
     def get(self, user_id):
         require_permission_or_owner('list_users', user_id)
-        user = get_object_or_404(models.User.get_by_id_and_org, user_id, self.current_org)
+
+        user = models.User.get_by_id(user_id)
+        if user is None:
+            abort(404, "User not found")
 
         self.record_event({
             'action': 'view',
@@ -303,7 +307,7 @@ class UserResource(BaseResource):
 
     def post(self, user_id):
         require_admin_or_owner(user_id)
-        user = models.User.get_by_id_and_org(user_id, self.current_org)
+        user = models.User.get_by_id(user_id)
 
         req = request.get_json(True)
 
@@ -374,7 +378,7 @@ class UserResource(BaseResource):
 
     @require_admin
     def delete(self, user_id):
-        user = models.User.get_by_id_and_org(user_id, self.current_org)
+        user = models.User.get_by_id(user_id)
         # admin cannot delete self; current user is an admin (`@require_admin`)
         # so just check user id
         if user.id == current_user.id:
@@ -392,7 +396,7 @@ class UserResource(BaseResource):
 class UserDisableResource(BaseResource):
     @require_admin
     def post(self, user_id):
-        user = models.User.get_by_id_and_org(user_id, self.current_org)
+        user = models.User.get_by_id(user_id)
         # admin cannot disable self; current user is an admin (`@require_admin`)
         # so just check user id
         if user.id == current_user.id:
@@ -405,7 +409,7 @@ class UserDisableResource(BaseResource):
 
     @require_admin
     def delete(self, user_id):
-        user = models.User.get_by_id_and_org(user_id, self.current_org)
+        user = models.User.get_by_id(user_id)
         user.enable()
         models.db.session.commit()
 
