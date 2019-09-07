@@ -150,8 +150,6 @@ class DashboardResource(BaseResource):
 
         api_key = models.ApiKey.get_by_object(dashboard)
         if api_key:
-            response['public_url'] = url_for('redash.public_dashboard', token=api_key.api_key,
-                                             org_slug=self.current_org.slug, _external=True)
             response['api_key'] = api_key.api_key
 
         response['can_edit'] = can_modify(dashboard, self.current_user)
@@ -245,6 +243,7 @@ class PublicDashboardResource(BaseResource):
         :param token: An API key for a public dashboard.
         :>json array widgets: An array of arrays of :ref:`public widgets <public-widget-label>`, corresponding to the rows and columns the widgets are displayed in
         """
+
         if not isinstance(self.current_user, models.ApiUser):
             api_key = get_object_or_404(models.ApiKey.get_by_api_key, token)
             dashboard = api_key.object
@@ -260,7 +259,6 @@ class DashboardShareResource(BaseResource):
         Allow anonymous access to a dashboard.
 
         :param dashboard_id: The numeric ID of the dashboard to share.
-        :>json string public_url: The URL for anonymous access to the dashboard.
         :>json api_key: The API key to use when accessing it.
         """
         dashboard = models.Dashboard.get_by_id_and_org(dashboard_id, self.current_org)
@@ -269,16 +267,13 @@ class DashboardShareResource(BaseResource):
         models.db.session.flush()
         models.db.session.commit()
 
-        public_url = url_for('redash.public_dashboard', token=api_key.api_key, org_slug=self.current_org.slug,
-                             _external=True)
-
         self.record_event({
             'action': 'activate_api_key',
             'object_id': dashboard.id,
             'object_type': 'dashboard',
         })
 
-        return {'public_url': public_url, 'api_key': api_key.api_key}
+        return {'api_key': api_key.api_key}
 
     def delete(self, dashboard_id):
         """
