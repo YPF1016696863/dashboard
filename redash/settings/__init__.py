@@ -239,6 +239,7 @@ ACCESS_CONTROL_ALLOW_HEADERS = os.environ.get("REDASH_CORS_ACCESS_CONTROL_ALLOW_
 default_query_runners = [
     'redash.query_runner.db2',
     'redash.query_runner.elasticsearch',
+    'redash.query_runner.excel',
     'redash.query_runner.graphite',
     'redash.query_runner.hive_ds',
     'redash.query_runner.influx_db',
