@@ -1,6 +1,7 @@
 from flask import Blueprint
 from flask import current_app
 
+from redash import settings
 from redash.apis.api import api
 from redash.utils import json_dumps
 
@@ -16,7 +17,9 @@ def json_response_with_status(response, status):
 
 
 def init_app(app):
-    from redash.apis import admin, authentication, config, queries, organization
+    from redash.apis import admin, authentication, config, queries, organization, file_upload
+    app.config.setdefault('MAX_CONTENT_LENGTH', settings.FILE_UPLOAD_MAX_CONTENT_LENGTH)
+
     app.register_blueprint(routes)
     api.init_app(app)
     authentication.init_app(app)

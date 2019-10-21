@@ -7,6 +7,7 @@ from funcy import distinct, remove
 from .helpers import fix_assets_path, array_from_string, parse_boolean, int_or_none, set_from_string
 from .organization import DATE_FORMAT, TIME_FORMAT  # noqa
 
+
 REDIS_URL = os.environ.get('REDASH_REDIS_URL', os.environ.get('REDIS_URL', "redis://localhost:6379/0"))
 PROXIES_COUNT = int(os.environ.get('REDASH_PROXIES_COUNT', "1"))
 
@@ -320,3 +321,9 @@ SQLPARSE_FORMAT_OPTIONS = {
     'reindent': parse_boolean(os.environ.get('SQLPARSE_FORMAT_REINDENT', 'true')),
     'keyword_case': os.environ.get('SQLPARSE_FORMAT_KEYWORD_CASE', 'upper'),
 }
+
+# FILE STUFF
+FILE_UPLOAD_FOLDER = fix_assets_path("../uploads")
+FILE_UPLOAD_ALLOWED_EXTENSIONS = set(['xls', 'xlsx', 'xlsm'])
+FILE_UPLOAD_MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+FILE_EXCEL_ALLOWED_EXTENSIONS = set(['xls', 'xlsx', 'xlsm'])
