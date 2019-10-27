@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+
 worker() {
   WORKERS_COUNT=${WORKERS_COUNT:-2}
   QUEUES=${QUEUES:-queries,scheduled_queries,celery,schemas}
