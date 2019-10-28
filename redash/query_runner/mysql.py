@@ -88,7 +88,7 @@ class Mysql(BaseSQLQueryRunner):
 
     @classmethod
     def name(cls):
-        return "#mysql_name"
+        return "MySQL数据库"
 
     @classmethod
     def enabled(cls):
