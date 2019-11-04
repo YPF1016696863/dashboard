@@ -39,24 +39,24 @@ class Mysql(BaseSQLQueryRunner):
                 'host': {
                     'type': 'string',
                     'default': '127.0.0.1',
-                    'title': '#host'
+                    'title': 'Host'
                 },
                 'user': {
                     'type': 'string',
-                    'title': '#user'
+                    'title': 'User'
                 },
                 'passwd': {
                     'type': 'string',
-                    'title': '#password'
+                    'title': 'Password'
                 },
                 'db': {
                     'type': 'string',
-                    'title': '#database_name'
+                    'title': 'Database Name'
                 },
                 'port': {
                     'type': 'number',
                     'default': 3306,
-                    'title': '#port'
+                    'title': 'Port'
                 }
             },
             "order": ['host', 'port', 'user', 'passwd', 'db'],
@@ -68,19 +68,19 @@ class Mysql(BaseSQLQueryRunner):
             schema['properties'].update({
                 'use_ssl': {
                     'type': 'boolean',
-                    'title': '#use_ssl'
+                    'title': 'Use SSL'
                 },
                 'ssl_cacert': {
                     'type': 'string',
-                    'title': '#path_to_ssl_cacert'
+                    'title': 'Path to SSL Cacert'
                 },
                 'ssl_cert': {
                     'type': 'string',
-                    'title': '#path_to_ssl_cert'
+                    'title': 'Path to SSL Cert'
                 },
                 'ssl_key': {
                     'type': 'string',
-                    'title': '#path_to_ssl_key'
+                    'title': 'Path to SSL Key'
                 }
             })
 

@@ -146,11 +146,12 @@ class DataSourceSchemaResource(BaseResource):
         data_source = get_object_or_404(models.DataSource.get_by_id_and_org, data_source_id, self.current_org)
         require_access(data_source, self.current_user, view_only)
         refresh = request.args.get('refresh') is not None
+        prefix = request.args.get('prefix')
 
         response = {}
 
         try:
-            response['schema'] = data_source.get_schema(refresh)
+            response['schema'] = data_source.get_schema(refresh, prefix)
         except NotSupported:
             response['error'] = {
                 'code': 1,

@@ -206,7 +206,7 @@ class MongoDB(BaseQueryRunner):
             self._merge_property_names(columns, d)
         return columns
 
-    def get_schema(self, get_stats=False):
+    def get_schema(self, prefix=None):
         schema = {}
         db = self._get_db()
         for collection_name in db.collection_names():

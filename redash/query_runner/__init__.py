@@ -3,7 +3,6 @@ import logging
 import requests
 from dateutil import parser
 
-from redash import settings
 from redash.utils import json_loads
 
 logger = logging.getLogger(__name__)
@@ -108,7 +107,7 @@ class BaseQueryRunner(object):
 
         return new_columns
 
-    def get_schema(self, get_stats=False):
+    def get_schema(self, prefix=None):
         raise NotSupported()
 
     def _run_query_internal(self, query):
@@ -129,21 +128,13 @@ class BaseQueryRunner(object):
 
 class BaseSQLQueryRunner(BaseQueryRunner):
 
-    def get_schema(self, get_stats=False):
+    def get_schema(self, prefix=None):
         schema_dict = {}
         self._get_tables(schema_dict)
-        if settings.SCHEMA_RUN_TABLE_SIZE_CALCULATIONS and get_stats:
-            self._get_tables_stats(schema_dict)
         return schema_dict.values()
 
     def _get_tables(self, schema_dict):
         return []
-
-    def _get_tables_stats(self, tables_dict):
-        for t in tables_dict.keys():
-            if type(tables_dict[t]) == dict:
-                res = self._run_query_internal('select count(*) as cnt from %s' % t)
-                tables_dict[t]['size'] = res[0]['cnt']
 
 
 class BaseHTTPQueryRunner(BaseQueryRunner):

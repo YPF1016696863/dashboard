@@ -1,78 +1,11 @@
-import urllib
+import json
+from collections import OrderedDict
 
 from redash.query_runner import *
-from redash.utils import json_loads, json_dumps
 
 
-def __extract_columns(data_resp):
-    ncols = len(data_resp["column"])
-
-    columns = []
-    mapping_idx_to_name = {}
-
-    for idx in range(ncols):
-        column_name = data_resp["column"][idx]["columnname"]
-        friendly_name = data_resp["column"][idx]["anothername"]
-
-        if not column_name:
-            column_name = 'column_{}'.format(idx)
-
-        if not friendly_name:
-            friendly_name = column_name
-
-        mapping_idx_to_name[idx] = column_name
-
-        columns.append({
-            'name': column_name,
-            'friendly_name': friendly_name,
-            'type': TYPE_STRING
-        })
-
-    return columns, mapping_idx_to_name
-
-
-def __extract_data(data_resp, columns, mapping_idx_to_name):
-    ncols = len(data_resp["column"])
-    nrows = len(data_resp["data"])
-
-    rows = []
-    col_data_type_flags = []
-
-    for col_idx in range(0, ncols):
-        col_data_type_flags.append(set())
-
-    for row_idx in range(1, nrows):
-        row = {}
-        for col_idx in range(0, ncols):
-            cell_v = data_resp["data"][row_idx][col_idx]
-            row[mapping_idx_to_name[col_idx]] = cell_v
-            cell_type = guess_type(cell_v)
-            col_data_type_flags[col_idx].add(cell_type)
-
-        rows.append(row)
-
-    for col_idx in range(0, ncols):
-        if len(col_data_type_flags[col_idx]) == 1:
-            columns[col_idx]['type'] = col_data_type_flags[col_idx].pop()
-        elif len(col_data_type_flags[col_idx]) == 2 and TYPE_FLOAT in col_data_type_flags[
-            col_idx] and TYPE_INTEGER in col_data_type_flags[col_idx]:
-            columns[col_idx]['type'] = TYPE_FLOAT
-
-    data = {'columns': columns, 'rows': rows}
-
-    return data
-
-
-def parse_resp(data_resp):
-    columns, mapping_idx_to_name = __extract_columns(data_resp)
-    data = __extract_data(data_resp, columns, mapping_idx_to_name)
-
-    return data
-
-
-class Redis29(BaseHTTPQueryRunner):
-    requires_authentication = False
-    requires_url = True
+class Redis29(BaseQueryRunner):
+    MAX_SCHEMA_COUNT = 100
 
     def __init__(self, configuration):
         super(Redis29, self).__init__(configuration)
@@ -82,78 +15,171 @@ class Redis29(BaseHTTPQueryRunner):
     def annotate_query(cls):
         return False
 
-    def __get_base_url(self):
-        base_url = self.configuration.get("url", None)
-        if base_url is None:
-            raise Exception("Not provided ROOT URL!")
+    @classmethod
+    def configuration_schema(cls):
+        schema = {
+            'type': 'object',
+            'properties': {
+                'host': {
+                    'type': 'string',
+                    'title': 'Host'
+                },
+                'port': {
+                    'type': 'number',
+                    'default': 6379,
+                    'title': 'Port'
+                },
+                'passwd': {
+                    'type': 'string',
+                    'title': 'Password'
+                },
+                'db': {
+                    'type': 'number',
+                    'default': 0,
+                    'title': 'Database 0 to 15'
+                }
+            },
+            "order": ['host', 'port', 'db', 'passwd'],
+            "required": ['host'],
+            'secret': ['passwd']
+        }
 
-        base_url = base_url.strip()
-        if base_url == "":
-            raise Exception("Empty ROOT URL!")
+        return schema
 
-        if not base_url.endswith("/"):
-            base_url = base_url + "/"
+    @classmethod
+    def name(cls):
+        return "Redis29"
 
-        if base_url.find("://") < 0:
-            raise Exception("Not qualified ROOT URL!")
+    @classmethod
+    def enabled(cls):
+        try:
+            import redis
+        except ImportError:
+            return False
 
-        return base_url
+        return True
+
+    def __get_connection(self):
+        import redis
+
+        host = self.configuration['host'] if 'host' in self.configuration else 'localhost'
+        password = self.configuration['passwd'] if 'passwd' in self.configuration else None
+        db = self.configuration['db'] if 'db' in self.configuration else 0
+        port = self.configuration['port'] if 'port' in self.configuration else 6379
+
+        connection = redis.StrictRedis(host=host,
+                                       password=password,
+                                       db=db,
+                                       port=port)
+
+        return connection
+
+    def __get_data(self, key):
+        conn = self.__get_connection()
+        ret = conn.get(key)
+
+        if ret is not None:
+            ret_obj = json.loads(ret, object_pairs_hook=OrderedDict)
+            return ret_obj
+
+        return None
+
+    def __get_column_names(self, data_obj, filter_columns=None):
+        column_names = []
+        column_name_set = set()
+
+        for obj in data_obj:
+            for k, v in obj.items():
+                if k not in column_name_set and (filter_columns is None or k in filter_columns):
+                    column_name_set.add(k)
+                    column_names.append(k)
+
+        return column_names
+
+    def __extract_data(self, data_obj, column_names):
+        columns = []
+        col_data_type_flags = {}
+
+        for c_name in column_names:
+            columns.append({'name': c_name, 'friendly_name': c_name, 'type': TYPE_STRING})
+            col_data_type_flags[c_name] = set()
+
+        rows = []
+
+        for obj in data_obj:
+            row = OrderedDict()
+            for c_name in column_names:
+                if c_name in obj:
+                    col_data_type_flags[c_name].add(guess_type(obj[c_name]))
+                    row[c_name] = obj[c_name]
+
+            rows.append(row)
+
+        for c in columns:
+            c_name = c['name']
+
+            if len(col_data_type_flags[c_name]) == 1:
+                c['type'] = col_data_type_flags[c_name].pop()
+            elif len(col_data_type_flags[c_name]) == 2 \
+                    and TYPE_FLOAT in col_data_type_flags[c_name] \
+                    and TYPE_INTEGER in col_data_type_flags[c_name]:
+                c['type'] = TYPE_FLOAT
+        data = {'columns': columns, 'rows': rows}
+
+        return data
 
     def test_connection(self):
-        self.__get_base_url()
+        conn = self.__get_connection()
+        conn.ping()
 
-    def __get_json_response(self, url):
-        headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+    def get_schema(self, prefix=None):
+        conn = self.__get_connection()
+        pattern = "*" if prefix is None else prefix
+        if '*' not in pattern:
+            pattern = pattern + "*"
 
-        return self.get_response(url=url, headers=headers)
+        schema_dict = OrderedDict()
+
+        for key in conn.scan_iter(pattern, self.MAX_SCHEMA_COUNT):
+            schema_dict[key] = {'name': key, 'columns': []}
+
+        for k, v in schema_dict.items():
+            data_obj = self.__get_data(k)
+            if data_obj is None:
+                continue
+
+            column_names = self.__get_column_names(data_obj)
+            v['columns'] = column_names
+
+        return schema_dict.values()
 
     def run_query(self, query, user):
-        base_url = self.__get_base_url()
-        api = base_url + "api/v1/getdata"
-
         try:
-            query = json_loads(query)
+            if query is None or query.strip() == '':
+                return None, "Empty query!"
 
-            if "id" not in query or query["id"] is None:
-                return None, "id is not provided!"
+            query_obj = json.loads(query, object_pairs_hook=OrderedDict)
+            if query_obj is None or type(query_obj) is not dict:
+                query_obj = {"key": query}
 
-            if not isinstance(query["id"], int):
-                return None, "id is not an int!"
+            if 'key' not in query_obj:
+                return None, "No key provided!"
 
-            if "type" not in query or query["type"] is None:
-                query["type"] = "redis"
+            filter_columns = None
 
-            if not isinstance(query["type"], str):
-                return None, "type is not an string!"
+            if 'columns' in query_obj:
+                filter_columns = set()
+                for c in query_obj['columns']:
+                    filter_columns.add(c)
 
-            query["type"] = query["type"].strip()
-
-            full = api + "?" + urllib.urlencode(query)
-
-            response, error = self.__get_json_response(full)
-            if error is not None:
-                return None, error
-
-            json_data = response.content.strip()
-            if not json_data:
-                return None, "Got empty response!"
-
-            content = json_loads(json_data)
-
-            if content is None or "status" not in content or content["status"] != "ok":
-                return None, "Not OK response!"
-
-            if "data" not in content or content["data"] is None:
+            data_obj = self.__get_data(query_obj['key'])
+            if data_obj is None:
                 return None, "Empty data!"
 
-            data_resp = content["data"]
+            column_names = self.__get_column_names(data_obj, filter_columns)
+            data = self.__extract_data(data_obj, column_names)
 
-            if "data" not in data_resp or "column" not in data_resp:
-                return None, "Malformat data!"
-
-            data = parse_resp(data_resp)
-
-            return json_dumps(data), None
+            return json.dumps(data), None
 
         except KeyboardInterrupt:
             return None, "Query cancelled by user."
