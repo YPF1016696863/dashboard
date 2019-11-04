@@ -79,8 +79,12 @@ class Redis29(BaseQueryRunner):
         ret = conn.get(key)
 
         if ret is not None:
-            ret_obj = json.loads(ret, object_pairs_hook=OrderedDict)
-            return ret_obj
+            try:
+                ret_obj = json.loads(ret, object_pairs_hook=OrderedDict)
+                if isinstance(ret_obj, list):
+                    return ret_obj
+            except Exception:
+                return None
 
         return None
 
@@ -89,10 +93,11 @@ class Redis29(BaseQueryRunner):
         column_name_set = set()
 
         for obj in data_obj:
-            for k, v in obj.items():
-                if k not in column_name_set and (filter_columns is None or k in filter_columns):
-                    column_name_set.add(k)
-                    column_names.append(k)
+            if isinstance(obj, dict) or isinstance(obj, OrderedDict):
+                for k, v in obj.items():
+                    if k not in column_name_set and (filter_columns is None or k in filter_columns):
+                        column_name_set.add(k)
+                        column_names.append(k)
 
         return column_names
 
