@@ -148,6 +148,8 @@ class Redis29(BaseQueryRunner):
         for key in conn.scan_iter(pattern, self.MAX_SCHEMA_COUNT):
             schema_dict[key] = {'name': key, 'columns': []}
 
+        ret = []
+
         for k, v in schema_dict.items():
             data_obj = self.__get_data(k)
             if data_obj is None:
@@ -156,15 +158,23 @@ class Redis29(BaseQueryRunner):
             column_names = self.__get_column_names(data_obj)
             v['columns'] = column_names
 
-        return schema_dict.values()
+            if column_names:
+                ret.append(v)
+
+        return ret
 
     def run_query(self, query, user):
         try:
             if query is None or query.strip() == '':
                 return None, "Empty query!"
 
-            query_obj = json.loads(query, object_pairs_hook=OrderedDict)
-            if query_obj is None or type(query_obj) is not dict:
+            query_obj = None
+
+            try:
+                query_obj = json.loads(query, object_pairs_hook=OrderedDict)
+                if query_obj is None or type(query_obj) is not OrderedDict:
+                    query_obj = {"key": query}
+            except Exception:
                 query_obj = {"key": query}
 
             if 'key' not in query_obj:
