@@ -918,7 +918,7 @@ class Visualization(TimestampMixin, BelongsToOrgMixin, db.Model):
     query_id = Column(db.Integer, db.ForeignKey("queries.id"))
     # query_rel and not query, because db.Model already has query defined.
     query_rel = db.relationship(Query, back_populates='visualizations')
-    user_id = Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    user_id = Column(db.Integer, db.ForeignKey("users.id"))
     user = db.relationship(User)
     name = Column(db.String(255))
     description = Column(db.String(4096), nullable=True)
