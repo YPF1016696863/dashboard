@@ -1,4 +1,4 @@
-from flask import request, url_for
+from flask import request
 from flask_restful import abort
 from funcy import partial
 from sqlalchemy.orm.exc import StaleDataError
@@ -14,7 +14,6 @@ from redash.permissions import (can_modify, not_view_only, require_access,
                                 require_permission, view_only)
 from redash.serializers import QuerySerializer
 from redash.utils import collect_parameters_from_request
-from redash.utils.org_resolving import current_org
 
 # Ordering map for relationships
 order_map = {
@@ -39,37 +38,37 @@ order_results = partial(
 )
 
 
-class QuerySearchResource(BaseResource):
-    @require_permission('view_query')
-    def get(self):
-        """
-        Search query text, names, and descriptions.
-
-        :qparam string q: Search term
-        :qparam number include_drafts: Whether to include draft in results
-
-        Responds with a list of :ref:`query <query-response-label>` objects.
-        """
-        term = request.args.get('q', '')
-        if not term:
-            return []
-
-        include_drafts = request.args.get('include_drafts') is not None
-
-        self.record_event({
-            'action': 'search',
-            'object_type': 'query',
-            'term': term,
-        })
-
-        # this redirects to the new query list API that is aware of search
-        new_location = url_for(
-            'queries',
-            q=term,
-            org_slug=current_org.slug,
-            drafts='true' if include_drafts else 'false',
-        )
-        return {}, 301, {'Location': new_location}
+# class QuerySearchResource(BaseResource):
+#     @require_permission('view_query')
+#     def get(self):
+#         """
+#         Search query text, names, and descriptions.
+#
+#         :qparam string q: Search term
+#         :qparam number include_drafts: Whether to include draft in results
+#
+#         Responds with a list of :ref:`query <query-response-label>` objects.
+#         """
+#         term = request.args.get('q', '')
+#         if not term:
+#             return []
+#
+#         include_drafts = request.args.get('include_drafts') is not None
+#
+#         self.record_event({
+#             'action': 'search',
+#             'object_type': 'query',
+#             'term': term,
+#         })
+#
+#         # this redirects to the new query list API that is aware of search
+#         new_location = url_for(
+#             'queries',
+#             q=term,
+#             org_slug=current_org.slug,
+#             drafts='true' if include_drafts else 'false',
+#         )
+#         return {}, 301, {'Location': new_location}
 
 
 class QueryRecentResource(BaseResource):

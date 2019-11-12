@@ -33,7 +33,7 @@ from redash.apis.handlers.queries import (MyQueriesResource, QueryArchiveResourc
                                           QueryFavoriteListResource,
                                           QueryForkResource, QueryListResource,
                                           QueryRecentResource, QueryRefreshResource,
-                                          QueryResource, QuerySearchResource,
+                                          QueryResource,
                                           QueryTagsResource)
 from redash.apis.handlers.query_results import (JobResource,
                                                 QueryResultDropdownResource,
@@ -81,6 +81,9 @@ api.add_resource(DashboardListResource, '/api/dashboards', endpoint='dashboards'
 api.add_resource(DashboardResource, '/api/dashboards/<dashboard_slug>', endpoint='dashboard')
 api.add_resource(PublicDashboardResource, '/api/dashboards/public/<token>', endpoint='public_dashboard')
 api.add_resource(DashboardShareResource, '/api/dashboards/<dashboard_id>/share', endpoint='dashboard_share')
+api.add_resource(DashboardFavoriteListResource, '/api/dashboards/favorites', endpoint='dashboard_favorites')
+api.add_resource(DashboardFavoriteResource, '/api/dashboards/<object_id>/favorite', endpoint='dashboard_favorite')
+api.add_resource(DashboardTagsResource, '/api/dashboards/tags', endpoint='dashboard_tags')
 
 api.add_resource(DataSourceTypeListResource, '/api/data_sources/types', endpoint='data_source_types')
 api.add_resource(DataSourceListResource, '/api/data_sources', endpoint='data_sources')
@@ -99,15 +102,7 @@ api.add_resource(GroupDataSourceResource, '/api/groups/<group_id>/data_sources/<
 
 api.add_resource(EventsResource, '/api/events', endpoint='events')
 
-api.add_resource(QueryFavoriteListResource, '/api/queries/favorites', endpoint='query_favorites')
-api.add_resource(QueryFavoriteResource, '/api/queries/<query_id>/favorite', endpoint='query_favorite')
-api.add_resource(DashboardFavoriteListResource, '/api/dashboards/favorites', endpoint='dashboard_favorites')
-api.add_resource(DashboardFavoriteResource, '/api/dashboards/<object_id>/favorite', endpoint='dashboard_favorite')
-
-api.add_resource(QueryTagsResource, '/api/queries/tags', endpoint='query_tags')
-api.add_resource(DashboardTagsResource, '/api/dashboards/tags', endpoint='dashboard_tags')
-
-api.add_resource(QuerySearchResource, '/api/queries/search', endpoint='queries_search')
+# api.add_resource(QuerySearchResource, '/api/queries/search', endpoint='queries_search')
 api.add_resource(QueryRecentResource, '/api/queries/recent', endpoint='recent_queries')
 api.add_resource(QueryArchiveResource, '/api/queries/archive', endpoint='queries_archive')
 api.add_resource(QueryListResource, '/api/queries', endpoint='queries')
@@ -115,6 +110,9 @@ api.add_resource(MyQueriesResource, '/api/queries/my', endpoint='my_queries')
 api.add_resource(QueryRefreshResource, '/api/queries/<query_id>/refresh', endpoint='query_refresh')
 api.add_resource(QueryResource, '/api/queries/<query_id>', endpoint='query')
 api.add_resource(QueryForkResource, '/api/queries/<query_id>/fork', endpoint='query_fork')
+api.add_resource(QueryFavoriteListResource, '/api/queries/favorites', endpoint='query_favorites')
+api.add_resource(QueryFavoriteResource, '/api/queries/<query_id>/favorite', endpoint='query_favorite')
+api.add_resource(QueryTagsResource, '/api/queries/tags', endpoint='query_tags')
 
 api.add_resource(ObjectPermissionsListResource, '/api/<object_type>/<object_id>/acl', endpoint='object_permissions')
 api.add_resource(CheckPermissionResource, '/api/<object_type>/<object_id>/acl/<access_type>',
@@ -151,6 +149,7 @@ api.add_resource(UserResetPasswordWithTokenResource, '/api/users/reset_password/
                  endpoint='user_reset_password_with_token')
 api.add_resource(UserVerifyEmailWithTokenResource, '/api/users/verify_email/<token>',
                  endpoint='user_verify_email_with_token')
+
 api.add_resource(VisualizationListResource, '/api/visualizations', endpoint='visualizations')
 api.add_resource(VisualizationResource, '/api/visualizations/<visualization_id>', endpoint='visualization')
 

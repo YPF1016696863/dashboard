@@ -918,6 +918,8 @@ class Visualization(TimestampMixin, BelongsToOrgMixin, db.Model):
     query_id = Column(db.Integer, db.ForeignKey("queries.id"))
     # query_rel and not query, because db.Model already has query defined.
     query_rel = db.relationship(Query, back_populates='visualizations')
+    user_id = Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    user = db.relationship(User)
     name = Column(db.String(255))
     description = Column(db.String(4096), nullable=True)
     options = Column(db.Text)
@@ -926,6 +928,40 @@ class Visualization(TimestampMixin, BelongsToOrgMixin, db.Model):
 
     def __str__(self):
         return u"%s %s" % (self.id, self.type)
+
+    @hybrid_property
+    def lowercase_name(self):
+        "Optional property useful for sorting purposes."
+        return self.name.lower()
+
+    @lowercase_name.expression
+    def lowercase_name(cls):
+        "The SQLAlchemy expression for the property above."
+        return func.lower(cls.name)
+
+    @classmethod
+    def all(cls, group_ids, user_id):
+        query = (
+            Visualization.query
+                .options(
+                subqueryload(Visualization.user).load_only('_profile_image_url', 'name'),
+            )
+                .outerjoin(Query)
+                .outerjoin(DataSourceGroup, Query.data_source_id == DataSourceGroup.data_source_id)
+                .filter(
+                (DataSourceGroup.group_id.in_(group_ids) |
+                 (Visualization.user_id == user_id)))
+                .distinct())
+
+        return query
+
+    @classmethod
+    def search(cls, search_term, groups_ids, user_id):
+        return cls.all(groups_ids, user_id).filter(cls.name.ilike(u'%{}%'.format(search_term)))
+
+    @classmethod
+    def get_by_id(cls, object_id):
+        return cls.query.filter(cls.id == object_id).one()
 
     @classmethod
     def get_by_id_and_org(cls, object_id, org):
