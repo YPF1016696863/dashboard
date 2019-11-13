@@ -458,6 +458,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
                                      name="Table",
                                      description='',
                                      type="TABLE",
+                                     user=kwargs.get('user'),
                                      options="{}"))
         return query
 
