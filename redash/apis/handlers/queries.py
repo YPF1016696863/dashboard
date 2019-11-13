@@ -12,7 +12,7 @@ from redash.permissions import (can_modify, not_view_only, require_access,
                                 require_admin_or_owner,
                                 require_object_modify_permission,
                                 require_permission, view_only)
-from redash.serializers import QuerySerializer
+from redash.serializers import QuerySerializer, serialize_query
 from redash.utils import collect_parameters_from_request
 
 # Ordering map for relationships
@@ -117,26 +117,27 @@ class BaseQueryListResource(BaseResource):
         # See if we want to do full-text search or just regular queries
         search_term = request.args.get('q', '')
 
-        queries = self.get_queries(search_term)
-
-        results = filter_by_tags(queries, models.Query.tags)
+        results = self.get_queries(search_term)
 
         # order results according to passed order parameter,
         # special-casing search queries where the database
         # provides an order by search rank
         ordered_results = order_results(results, fallback=not bool(search_term))
 
-        page = request.args.get('page', 1, type=int)
-        page_size = request.args.get('page_size', 25, type=int)
+        if request.args.has_key('all'):
+            response = [serialize_query(result, with_stats=True, with_last_modified_by=False) for result in ordered_results]
+        else:
+            page = request.args.get('page', 1, type=int)
+            page_size = request.args.get('page_size', 25, type=int)
 
-        response = paginate(
-            ordered_results,
-            page=page,
-            page_size=page_size,
-            serializer=QuerySerializer,
-            with_stats=True,
-            with_last_modified_by=False
-        )
+            response = paginate(
+                ordered_results,
+                page=page,
+                page_size=page_size,
+                serializer=QuerySerializer,
+                with_stats=True,
+                with_last_modified_by=False
+            )
 
         if search_term:
             self.record_event({

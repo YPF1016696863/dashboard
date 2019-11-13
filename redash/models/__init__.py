@@ -923,6 +923,7 @@ class Visualization(TimestampMixin, BelongsToOrgMixin, db.Model):
     user = db.relationship(User)
     name = Column(db.String(255))
     description = Column(db.String(4096), nullable=True)
+    is_archived = Column(db.Boolean, default=False, index=True)
     options = Column(db.Text)
 
     __tablename__ = 'visualizations'
@@ -950,6 +951,7 @@ class Visualization(TimestampMixin, BelongsToOrgMixin, db.Model):
                 .outerjoin(Query)
                 .outerjoin(DataSourceGroup, Query.data_source_id == DataSourceGroup.data_source_id)
                 .filter(
+                Visualization.is_archived == False,
                 (DataSourceGroup.group_id.in_(group_ids) |
                  (Visualization.user_id == user_id)))
                 .distinct())

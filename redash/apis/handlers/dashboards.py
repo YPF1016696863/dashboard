@@ -65,15 +65,18 @@ class DashboardListResource(BaseResource):
         # provides an order by search rank
         ordered_results = order_results(results, fallback=not bool(search_term))
 
-        page = request.args.get('page', 1, type=int)
-        page_size = request.args.get('page_size', 25, type=int)
+        if request.args.has_key('all'):
+            response = [serialize_dashboard(result) for result in ordered_results]
+        else:
+            page = request.args.get('page', 1, type=int)
+            page_size = request.args.get('page_size', 25, type=int)
 
-        response = paginate(
-            ordered_results,
-            page=page,
-            page_size=page_size,
-            serializer=serialize_dashboard,
-        )
+            response = paginate(
+                ordered_results,
+                page=page,
+                page_size=page_size,
+                serializer=serialize_dashboard,
+            )
 
         if search_term:
             self.record_event({
