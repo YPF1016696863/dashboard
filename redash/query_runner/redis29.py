@@ -9,7 +9,6 @@ class Redis29(BaseQueryRunner):
 
     def __init__(self, configuration):
         super(Redis29, self).__init__(configuration)
-        self.syntax = 'json'
 
     @classmethod
     def annotate_query(cls):
@@ -81,8 +80,10 @@ class Redis29(BaseQueryRunner):
         if ret is not None:
             try:
                 ret_obj = json.loads(ret, object_pairs_hook=OrderedDict)
-                if isinstance(ret_obj, list):
-                    return ret_obj
+                if ret_obj is not None and isinstance(ret_obj, OrderedDict) and "data" in ret_obj:
+                    data_arr = ret_obj["data"]
+                    if data_arr is not None and isinstance(data_arr, list):
+                        return data_arr
             except Exception:
                 return None
 
@@ -189,7 +190,7 @@ class Redis29(BaseQueryRunner):
 
             data_obj = self.__get_data(query_obj['key'])
             if data_obj is None:
-                return None, "Empty data!"
+                return None, "Empty data or not supported data format!"
 
             column_names = self.__get_column_names(data_obj, filter_columns)
             data = self.__extract_data(data_obj, column_names)
