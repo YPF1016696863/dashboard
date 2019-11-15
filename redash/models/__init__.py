@@ -444,6 +444,8 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
         for vis in self.visualizations:
             for w in vis.widgets:
                 db.session.delete(w)
+            vis.is_archived = True
+            db.session.add(vis)
 
         for a in self.alerts:
             db.session.delete(a)
@@ -912,9 +914,10 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
 
 
 @python_2_unicode_compatible
-@generic_repr('id', 'name', 'type', 'query_id')
-class Visualization(TimestampMixin, BelongsToOrgMixin, db.Model):
+@generic_repr('id', 'name', 'type', 'query_id', 'is_archived', 'version')
+class Visualization(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     id = Column(db.Integer, primary_key=True)
+    version = Column(db.Integer, default=1)
     type = Column(db.String(100))
     query_id = Column(db.Integer, db.ForeignKey("queries.id"))
     # query_rel and not query, because db.Model already has query defined.
@@ -930,6 +933,16 @@ class Visualization(TimestampMixin, BelongsToOrgMixin, db.Model):
 
     def __str__(self):
         return u"%s %s" % (self.id, self.type)
+
+    def archive(self, user=None):
+        db.session.add(self)
+        self.is_archived = True
+
+        for w in self.widgets:
+            db.session.delete(w)
+
+        if user:
+            self.record_changes(user)
 
     @hybrid_property
     def lowercase_name(self):

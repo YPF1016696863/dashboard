@@ -121,8 +121,10 @@ def serialize_query(query, with_stats=False, with_visualizations=False, with_use
             d['runtime'] = None
 
     if with_visualizations:
-        d['visualizations'] = [serialize_visualization(vis, with_query=False)
-                               for vis in query.visualizations]
+        d['visualizations'] = []
+        for vis in query.visualizations:
+            if vis.is_archived == False:
+                d['visualizations'].append(serialize_visualization(vis, with_query=False))
 
     return d
 

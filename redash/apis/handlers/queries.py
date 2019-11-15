@@ -355,7 +355,7 @@ class QueryResource(BaseResource):
 
         return result
 
-    # TODO: move to resource of its own? (POST /queries/{id}/archive)
+    @require_permission('edit_query')
     def delete(self, query_id):
         """
         Archives a query.
