@@ -54,7 +54,8 @@ from redash.apis.handlers.users import (UserDisableResource, UserInviteResource,
                                         UserVerifyEmailWithTokenResource,
                                         UserResource)
 from redash.apis.handlers.visualizations import (VisualizationListResource,
-                                                 VisualizationResource)
+                                                 VisualizationResource, PublicVisualizationResource,
+                                                 VisualizationShareResource)
 from redash.apis.handlers.widgets import WidgetListResource, WidgetResource
 from redash.utils import json_dumps
 
@@ -152,6 +153,8 @@ api.add_resource(UserVerifyEmailWithTokenResource, '/api/users/verify_email/<tok
 
 api.add_resource(VisualizationListResource, '/api/visualizations', endpoint='visualizations')
 api.add_resource(VisualizationResource, '/api/visualizations/<visualization_id>', endpoint='visualization')
+api.add_resource(PublicVisualizationResource, '/api/visualizations/public/<token>', endpoint='public_visualization')
+api.add_resource(VisualizationShareResource, '/api/visualizations/<visualization_id>/share', endpoint='visualization_share')
 
 api.add_resource(WidgetListResource, '/api/widgets', endpoint='widgets')
 api.add_resource(WidgetResource, '/api/widgets/<int:widget_id>', endpoint='widget')

@@ -1,12 +1,15 @@
 from flask import request
+from flask_restful import abort
 from funcy import partial
 
 from redash import models
-from redash.apis.handlers.base import (BaseResource, get_object_or_404,
-                                       paginate, order_results as _order_results)
-from redash.permissions import (require_object_modify_permission,
-                                require_permission, require_access, view_only, can_modify)
-from redash.serializers import serialize_visualization
+from redash.apis.handlers.base import (BaseResource, get_object_or_404, paginate,
+                                       order_results as _order_results)
+from redash.permissions import (can_modify, require_object_modify_permission,
+                                require_permission)
+from redash.permissions import (require_access, view_only)
+from redash.security import csp_allows_embeding
+from redash.serializers import (serialize_visualization, public_visualization)
 from redash.utils import json_dumps
 
 # Ordering map for relationships
@@ -159,3 +162,68 @@ class VisualizationResource(BaseResource):
         require_object_modify_permission(vis.query_rel, self.current_user)
         vis.archive(self.current_user)
         models.db.session.commit()
+
+
+class PublicVisualizationResource(BaseResource):
+    decorators = [csp_allows_embeding]
+
+    def get(self, token):
+        """
+        Retrieve a public visualization.
+
+        :param token: An API key for a public visualization.
+        :>json representation of the visualization
+        """
+
+        api_key = get_object_or_404(models.ApiKey.get_by_api_key, token)
+        vis = api_key.object
+
+        if vis is None:
+            abort(404)
+
+        return public_visualization(vis)
+
+
+class VisualizationShareResource(BaseResource):
+    def post(self, visualization_id):
+        """
+        Allow anonymous access to a visualization.
+
+        :param visualization_id: The numeric ID of the visualization to share.
+        :>json api_key: The API key to use when accessing it.
+        """
+
+        vis = models.Visualization.get_by_id(visualization_id)
+        require_object_modify_permission(vis.query_rel, self.current_user)
+        api_key = models.ApiKey.create_for_object(vis, self.current_user)
+        models.db.session.flush()
+        models.db.session.commit()
+
+        self.record_event({
+            'action': 'activate_api_key',
+            'object_id': vis.id,
+            'object_type': 'visualization',
+        })
+
+        return {'api_key': api_key.api_key}
+
+    def delete(self, visualization_id):
+        """
+        Disable anonymous access to a visualization.
+
+        :param visualization_id: The numeric ID of the visualization to unshare.
+        """
+        vis = models.Visualization.get_by_id(visualization_id)
+        require_object_modify_permission(vis.query_rel, self.current_user)
+        api_key = models.ApiKey.get_by_object(vis)
+
+        if api_key:
+            api_key.active = False
+            models.db.session.add(api_key)
+            models.db.session.commit()
+
+        self.record_event({
+            'action': 'deactivate_api_key',
+            'object_id': vis.id,
+            'object_type': 'visualization',
+        })

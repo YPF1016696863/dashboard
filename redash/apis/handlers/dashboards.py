@@ -1,4 +1,4 @@
-from flask import request, url_for
+from flask import request
 from flask_restful import abort
 from funcy import project, partial
 from sqlalchemy.orm.exc import StaleDataError
@@ -237,7 +237,7 @@ class DashboardResource(BaseResource):
 
 
 class PublicDashboardResource(BaseResource):
-    decorators = BaseResource.decorators + [csp_allows_embeding]
+    decorators = [csp_allows_embeding]
 
     def get(self, token):
         """
@@ -247,11 +247,11 @@ class PublicDashboardResource(BaseResource):
         :>json array widgets: An array of arrays of :ref:`public widgets <public-widget-label>`, corresponding to the rows and columns the widgets are displayed in
         """
 
-        if not isinstance(self.current_user, models.ApiUser):
-            api_key = get_object_or_404(models.ApiKey.get_by_api_key, token)
-            dashboard = api_key.object
-        else:
-            dashboard = self.current_user.object
+        api_key = get_object_or_404(models.ApiKey.get_by_api_key, token)
+        dashboard = api_key.object
+
+        if dashboard is None:
+            abort(404)
 
         return serializers.public_dashboard(dashboard)
 

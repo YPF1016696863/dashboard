@@ -11,6 +11,25 @@ from redash.permissions import has_access, view_only
 from redash.utils import json_loads
 
 
+def public_visualization(visualization):
+    query_data = models.QueryResult.query.get(visualization.query_rel.latest_query_data_id).to_dict()
+    return {
+        'type': visualization.type,
+        'name': visualization.name,
+        'description': visualization.description,
+        'options': json_loads(visualization.options),
+        'updated_at': visualization.updated_at,
+        'created_at': visualization.created_at,
+        'query': {
+            'query': ' ',  # workaround, as otherwise the query data won't be loaded.
+            'name': visualization.query_rel.name,
+            'description': visualization.query_rel.description,
+            'options': {},
+            'latest_query_data': query_data
+        }
+    }
+
+
 def public_widget(widget):
     res = {
         'id': widget.id,
@@ -22,22 +41,7 @@ def public_widget(widget):
     }
 
     if widget.visualization and widget.visualization.id:
-        query_data = models.QueryResult.query.get(widget.visualization.query_rel.latest_query_data_id).to_dict()
-        res['visualization'] = {
-            'type': widget.visualization.type,
-            'name': widget.visualization.name,
-            'description': widget.visualization.description,
-            'options': json_loads(widget.visualization.options),
-            'updated_at': widget.visualization.updated_at,
-            'created_at': widget.visualization.created_at,
-            'query': {
-                'query': ' ',  # workaround, as otherwise the query data won't be loaded.
-                'name': widget.visualization.query_rel.name,
-                'description': widget.visualization.query_rel.description,
-                'options': {},
-                'latest_query_data': query_data
-            }
-        }
+        res['visualization'] = public_visualization(widget.visualization)
 
     return res
 

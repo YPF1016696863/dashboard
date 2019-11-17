@@ -914,6 +914,7 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
 
 
 @python_2_unicode_compatible
+@gfk_type
 @generic_repr('id', 'name', 'type', 'query_id', 'is_archived', 'version')
 class Visualization(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     id = Column(db.Integer, primary_key=True)

@@ -77,7 +77,8 @@ class GFKBase(object):
         else:
             object_class = _gfk_types[self.object_type]
             self._object = session.query(object_class).filter(
-                object_class.id == self.object_id).first()
+                object_class.id == self.object_id,
+                object_class.is_archived == False).first()
             return self._object
 
     @object.setter
