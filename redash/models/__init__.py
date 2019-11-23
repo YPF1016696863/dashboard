@@ -480,6 +480,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
             cls
                 .query
                 .options(
+                joinedload(Query.visualizations),
                 joinedload(Query.user),
                 joinedload(
                     Query.latest_query_data

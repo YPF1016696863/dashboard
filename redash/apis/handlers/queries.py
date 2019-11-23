@@ -125,7 +125,7 @@ class BaseQueryListResource(BaseResource):
         ordered_results = order_results(results, fallback=not bool(search_term))
 
         if request.args.has_key('all'):
-            response = [serialize_query(result, with_stats=True, with_last_modified_by=False) for result in ordered_results]
+            response = [serialize_query(result, with_stats=True, with_last_modified_by=False, with_visualizations=True) for result in ordered_results]
         else:
             page = request.args.get('page', 1, type=int)
             page_size = request.args.get('page_size', 25, type=int)
@@ -136,7 +136,8 @@ class BaseQueryListResource(BaseResource):
                 page_size=page_size,
                 serializer=QuerySerializer,
                 with_stats=True,
-                with_last_modified_by=False
+                with_last_modified_by=False,
+                with_visualizations=True
             )
 
         if search_term:
