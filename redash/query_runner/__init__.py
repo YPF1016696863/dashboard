@@ -22,7 +22,8 @@ __all__ = [
     'register',
     'get_query_runner',
     'import_query_runners',
-    'guess_type'
+    'guess_type',
+    'guess_type_and_decode'
 ]
 
 # Valid types of columns returned in results:
@@ -263,28 +264,34 @@ def import_query_runners(query_runner_imports):
 
 
 def guess_type(string_value):
+    val_type, val = guess_type_and_decode(string_value)
+
+    return val_type
+
+
+def guess_type_and_decode(string_value):
     if string_value == '' or string_value is None:
-        return TYPE_STRING
+        return TYPE_STRING, string_value
+
+    if type(string_value) != str:
+        string_value = str(string_value)
 
     try:
-        int(string_value)
-        return TYPE_INTEGER
-    except (ValueError, OverflowError):
-        pass
+        val = float(string_value)
+        if val.is_integer():
+            return TYPE_INTEGER, int(val)
 
-    try:
-        float(string_value)
-        return TYPE_FLOAT
+        return TYPE_FLOAT, val
     except (ValueError, OverflowError):
         pass
 
     if unicode(string_value).lower() in ('true', 'false'):
-        return TYPE_BOOLEAN
+        return TYPE_BOOLEAN, unicode(string_value).lower() == 'true'
 
     try:
-        parser.parse(string_value)
-        return TYPE_DATETIME
+        val = parser.parse(string_value)
+        return TYPE_DATETIME, val
     except (ValueError, OverflowError):
         pass
 
-    return TYPE_STRING
+    return TYPE_STRING, string_value
