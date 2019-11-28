@@ -1,7 +1,8 @@
 import json
 from collections import OrderedDict
-from sympy import sympify
+
 from redash.query_runner import *
+
 
 ####
 # QUERY E#XAMPLE
@@ -128,16 +129,6 @@ class Redis29(BaseQueryRunner):
 
         return column_names
 
-    def __get_column_type_from_set(self, type_set):
-        if len(type_set) == 1:
-            return type_set.pop()
-        elif len(type_set) == 2 \
-                and TYPE_FLOAT in type_set \
-                and TYPE_INTEGER in type_set:
-            return TYPE_FLOAT
-        else:
-            return TYPE_STRING
-
     def __extract_data(self, data_obj, column_names):
         columns = []
         col_data_type_flags = {}
@@ -160,98 +151,13 @@ class Redis29(BaseQueryRunner):
             rows.append(row)
 
         for c in columns:
-            c['type'] = self.__get_column_type_from_set(col_data_type_flags[c['name']])
+            c['type'] = get_column_type_from_set(col_data_type_flags[c['name']])
 
-        return {'columns': columns, 'rows': rows}
-
-    def __add_extra_columns(self, data, extra_columns):
-        if extra_columns is None:
-            extra_columns = []
-
-        columns = data['columns']
-        rows = data['rows']
-
-        column_name_set = set()
-        for column in columns:
-            column_name_set.add(column['name'])
-
-        for extra_column_def in extra_columns:
-            if type(extra_column_def) is OrderedDict and "expr" in extra_column_def and "name" in extra_column_def:
-                expr = extra_column_def["expr"]
-                name = extra_column_def["name"]
-
-                if name in column_name_set:
-                    return "Duplicated columns in extra column definition: " + name, None
-
-                column_name_set.add(name)
-                column_data_type = set()
-
-                for row in rows:
-                    data = None
-
-                    try:
-                        data = str(sympify(expr).subs(row).evalf())
-                    except:
-                        data = expr
-                    val_type, val = guess_type_and_decode(data)
-
-                    column_data_type.add(val_type)
-                    row[name] = val
-
-                columns.append(
-                    {'name': name, 'friendly_name': name, 'type': self.__get_column_type_from_set(column_data_type)})
-            else:
-                return "Unexpected extra column definition!", None
-
-        return None, {'columns': columns, 'rows': rows}
-
-    def __handle_select_and_ordering(self, data, selected_columns_set, ordered_columns_list):
-        columns = data['columns']
-        rows = data['rows']
-
-        column_name_set = set()
-        column_name_mapping = {}
-        for column in columns:
-            column_name_set.add(column['name'])
-            column_name_mapping[column['name']] = column
-
-        if len(selected_columns_set) == 0:
-            selected_columns_set = column_name_set
-
-        if not selected_columns_set.issubset(column_name_set):
-            return "Selected more columns than actually exist!", None
-
-        ordered_columns_set = set(ordered_columns_list)
-        if not ordered_columns_set.issubset(selected_columns_set):
-            return "Ordering not selected columns!", None
-
-        new_columns = []
-        for ordered_name in ordered_columns_list:
-            new_columns.append(column_name_mapping[ordered_name])
-
-        for column in columns:
-            regular_column_name = column['name']
-            if regular_column_name not in ordered_columns_set and regular_column_name in selected_columns_set:
-                new_columns.append(column)
-
-        new_rows = []
         for row in rows:
-            new_row = OrderedDict()
-            for column in new_columns:
-                if column['name'] in row:
-                    new_row[column['name']] = row[column['name']]
-
-            new_rows.append(new_row)
-
-        return None, {'columns': new_columns, 'rows': new_rows}
-
-    def __handle_alias(self, data, alias_mapping):
-        columns = data['columns']
-        rows = data['rows']
-
-        for column in columns:
-            if column['name'] in alias_mapping:
-                column['friendly_name'] = alias_mapping[column['name']]
+            for c in columns:
+                c_name = c['name']
+                if c_name not in row:
+                    row[c_name] = default_value_for_type(c['type'])
 
         return {'columns': columns, 'rows': rows}
 
@@ -314,7 +220,7 @@ class Redis29(BaseQueryRunner):
                 extra_columns = query_obj['extra']
 
                 if isinstance(extra_columns, list):
-                    err, data = self.__add_extra_columns(data, extra_columns)
+                    err, data = handle_extra_columns(data, extra_columns)
 
                     if err is not None:
                         return None, err
@@ -343,7 +249,7 @@ class Redis29(BaseQueryRunner):
                 if not isinstance(ordered_columns_list, list):
                     return None, "order field is not a list!"
 
-            err, data = self.__handle_select_and_ordering(data, selected_columns_set, ordered_columns_list)
+            err, data = handle_select_and_ordering(data, selected_columns_set, ordered_columns_list)
             if err is not None:
                 return None, err
 
@@ -351,7 +257,7 @@ class Redis29(BaseQueryRunner):
                 alias_mapping = query_obj['alias']
 
                 if isinstance(alias_mapping, OrderedDict):
-                    data = self.__handle_alias(data, alias_mapping)
+                    data = handle_alias(data, alias_mapping)
                 else:
                     return None, "alias field is not a dictionary!"
 
@@ -361,7 +267,7 @@ class Redis29(BaseQueryRunner):
             return None, "Query cancelled by user."
 
 
-register(Redis29)
+#register(Redis29)
 
-#redis = Redis29({'host': '127.0.0.1'})
-#print(redis.run_query('{"key":"XYZ","extra":[{"expr":"(a+bc)/5*ext","name":"add"},{"expr":"add -3","name":"more"}],"select":["bc"],"order":["bc","more"],"alias":{"more":"more nice column name"}}', None))
+redis = Redis29({'host': '127.0.0.1'})
+print(redis.run_query('{"key":"XYZ","extra":[{"expr":"(a+bc)/5","name":"add"},{"expr":"add -3","name":"more"}],"select":["*"],"order":["bc","more"],"alias":{"more":"more nice column name"}}', None))

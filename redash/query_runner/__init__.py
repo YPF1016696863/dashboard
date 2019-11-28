@@ -1,7 +1,9 @@
 import logging
+from collections import OrderedDict
 
 import requests
 from dateutil import parser
+from sympy import sympify
 
 from redash.utils import json_loads
 
@@ -23,7 +25,12 @@ __all__ = [
     'get_query_runner',
     'import_query_runners',
     'guess_type',
-    'guess_type_and_decode'
+    'guess_type_and_decode',
+    'default_value_for_type',
+    'handle_extra_columns',
+    'handle_alias',
+    'handle_select_and_ordering',
+    'get_column_type_from_set'
 ]
 
 # Valid types of columns returned in results:
@@ -295,3 +302,120 @@ def guess_type_and_decode(string_value):
         pass
 
     return TYPE_STRING, string_value
+
+
+def default_value_for_type(tp):
+    if tp == TYPE_FLOAT or tp == TYPE_INTEGER:
+        return 0
+
+    if tp == TYPE_BOOLEAN:
+        return 'false'
+
+    return ""
+
+
+def get_column_type_from_set(type_set):
+    if len(type_set) == 1:
+        return type_set.pop()
+    elif len(type_set) == 2 \
+            and TYPE_FLOAT in type_set \
+            and TYPE_INTEGER in type_set:
+        return TYPE_FLOAT
+    else:
+        return TYPE_STRING
+
+
+def handle_extra_columns(data, extra_columns):
+    if extra_columns is None:
+        extra_columns = []
+
+    columns = data['columns']
+    rows = data['rows']
+
+    column_name_set = set()
+    for column in columns:
+        column_name_set.add(column['name'])
+
+    for extra_column_def in extra_columns:
+        if (type(extra_column_def) is OrderedDict or type(extra_column_def) is dict) \
+                and "expr" in extra_column_def \
+                and "name" in extra_column_def:
+            expr = extra_column_def["expr"]
+            name = extra_column_def["name"]
+
+            if name in column_name_set:
+                return "Duplicated columns in extra column definition: " + name, None
+
+            column_name_set.add(name)
+            column_data_type = set()
+
+            for row in rows:
+                data = None
+
+                try:
+                    data = str(sympify(expr).subs(row).evalf())
+                except:
+                    data = expr
+                val_type, val = guess_type_and_decode(data)
+
+                column_data_type.add(val_type)
+                row[name] = val
+
+            columns.append(
+                {'name': name, 'friendly_name': name, 'type': get_column_type_from_set(column_data_type)})
+        else:
+            return "Unexpected extra column definition!", None
+
+    return None, {'columns': columns, 'rows': rows}
+
+
+def handle_select_and_ordering(data, selected_columns_set, ordered_columns_list):
+    columns = data['columns']
+    rows = data['rows']
+
+    column_name_set = set()
+    column_name_mapping = {}
+    for column in columns:
+        column_name_set.add(column['name'])
+        column_name_mapping[column['name']] = column
+
+    if len(selected_columns_set) == 0:
+        selected_columns_set = column_name_set
+
+    if not selected_columns_set.issubset(column_name_set):
+        return "Selected more columns than actually exist!", None
+
+    ordered_columns_set = set(ordered_columns_list)
+    if not ordered_columns_set.issubset(selected_columns_set):
+        return "Ordering not selected columns!", None
+
+    new_columns = []
+    for ordered_name in ordered_columns_list:
+        new_columns.append(column_name_mapping[ordered_name])
+
+    for column in columns:
+        regular_column_name = column['name']
+        if regular_column_name not in ordered_columns_set and regular_column_name in selected_columns_set:
+            new_columns.append(column)
+
+    new_rows = []
+    for row in rows:
+        new_row = OrderedDict()
+        for column in new_columns:
+            if column['name'] in row:
+                new_row[column['name']] = row[column['name']]
+
+        new_rows.append(new_row)
+
+    return None, {'columns': new_columns, 'rows': new_rows}
+
+
+def handle_alias(data, alias_mapping):
+    columns = data['columns']
+    rows = data['rows']
+
+    for column in columns:
+        if column['name'] in alias_mapping:
+            column['friendly_name'] = alias_mapping[column['name']]
+
+    return {'columns': columns, 'rows': rows}
