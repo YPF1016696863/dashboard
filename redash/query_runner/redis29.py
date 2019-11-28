@@ -267,7 +267,7 @@ class Redis29(BaseQueryRunner):
             return None, "Query cancelled by user."
 
 
-#register(Redis29)
+register(Redis29)
 
-redis = Redis29({'host': '127.0.0.1'})
-print(redis.run_query('{"key":"XYZ","extra":[{"expr":"(a+bc)/5","name":"add"},{"expr":"add -3","name":"more"}],"select":["*"],"order":["bc","more"],"alias":{"more":"more nice column name"}}', None))
+#redis = Redis29({'host': '127.0.0.1'})
+#print(redis.run_query('{"key":"XYZ","extra":[{"expr":"(a+bc)/5","name":"add"},{"expr":"add -3","name":"more"}],"select":["*"],"order":["bc","more"],"alias":{"more":"more nice column name"}}', None))
