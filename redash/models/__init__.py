@@ -815,7 +815,7 @@ def generate_slug(ctx):
 
 @python_2_unicode_compatible
 @gfk_type
-@generic_repr('id', 'name', 'slug', 'user_id', 'org_id', 'version', 'is_archived', 'is_draft')
+@generic_repr('id', 'name', 'slug', 'user_id', 'org_id', 'version', 'is_archived', 'is_draft', 'background_image')
 class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     id = Column(db.Integer, primary_key=True)
     version = Column(db.Integer)
@@ -827,6 +827,7 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
     user = db.relationship(User)
     # layout is no longer used, but kept so we know how to render old dashboards.
     layout = Column(db.Text)
+    background_image = Column(db.String(1024), nullable=True)
     dashboard_filters_enabled = Column(db.Boolean, default=False)
     is_archived = Column(db.Boolean, default=False, index=True)
     is_draft = Column(db.Boolean, default=True, index=True)
