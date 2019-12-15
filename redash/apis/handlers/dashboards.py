@@ -43,6 +43,7 @@ class DashboardListResource(BaseResource):
         objects.
         """
         search_term = request.args.get('q')
+        viz_id = request.args.get('visid')
 
         if search_term:
             results = models.Dashboard.search(
@@ -50,12 +51,14 @@ class DashboardListResource(BaseResource):
                 self.current_user.group_ids,
                 self.current_user.id,
                 search_term,
+                viz_id
             )
         else:
             results = models.Dashboard.all(
                 self.current_org,
                 self.current_user.group_ids,
                 self.current_user.id,
+                viz_id
             )
 
         results = filter_by_tags(results, models.Dashboard.tags)

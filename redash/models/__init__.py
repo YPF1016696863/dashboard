@@ -843,7 +843,7 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
         return u"%s=%s" % (self.id, self.name)
 
     @classmethod
-    def all(cls, org, group_ids, user_id):
+    def all(cls, org, group_ids, user_id, viz_id=None):
         query = (
             Dashboard.query
                 .options(
@@ -854,10 +854,14 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
                 .outerjoin(Query)
                 .outerjoin(DataSourceGroup, Query.data_source_id == DataSourceGroup.data_source_id)
                 .filter(
-                Dashboard.is_archived == False,
-                (DataSourceGroup.group_id.in_(group_ids) |
-                 (Dashboard.user_id == user_id) |
-                 ((Widget.dashboard != None) & (Widget.visualization == None))),
+                Dashboard.is_archived == False, (
+                        DataSourceGroup.group_id.in_(group_ids) |
+                        (Dashboard.user_id == user_id) |
+                        ((Widget.dashboard is not None) & (Widget.visualization is None))
+                ),
+                (
+                        (viz_id is None) or (Visualization.id == viz_id)
+                ),
                 Dashboard.org == org)
                 .distinct())
 
@@ -866,9 +870,9 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
         return query
 
     @classmethod
-    def search(cls, org, groups_ids, user_id, search_term):
+    def search(cls, org, groups_ids, user_id, search_term, viz_id=None):
         # TODO: switch to FTS
-        return cls.all(org, groups_ids, user_id).filter(cls.name.ilike(u'%{}%'.format(search_term)))
+        return cls.all(org, groups_ids, user_id, viz_id).filter(cls.name.ilike(u'%{}%'.format(search_term)))
 
     @classmethod
     def all_tags(cls, org, user):
