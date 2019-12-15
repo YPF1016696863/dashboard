@@ -189,4 +189,4 @@ register(Excel)
 register(ExcelUpload)
 
 #x = Excel({})
-#print(x.run_query('http://www.southeastern.edu/acad_research/depts/lang/flrc/movie_databases/English.xls,0', None))
+#print(x.run_query('http://whly.gd.gov.cn/gd_zww/upload/file/file/201801/26144653sx0l.xls', None))

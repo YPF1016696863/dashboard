@@ -224,7 +224,7 @@ class BaseHTTPQueryRunner(BaseQueryRunner):
                 "Failed to execute query. "
                 "Return Code: {} Reason: {}".format(
                     response.status_code,
-                    response.text
+                    response.text.encode('utf-8')
                 )
             )
         except requests.RequestException as exc:
@@ -280,6 +280,9 @@ def guess_type_and_decode(string_value):
     if string_value == '' or string_value is None:
         return TYPE_STRING, string_value
 
+    if type(string_value) == unicode:
+        string_value = string_value.encode('utf-8')
+
     if type(string_value) != str:
         string_value = str(string_value)
 
@@ -292,8 +295,8 @@ def guess_type_and_decode(string_value):
     except (ValueError, OverflowError):
         pass
 
-    if unicode(string_value).lower() in ('true', 'false'):
-        return TYPE_BOOLEAN, unicode(string_value).lower() == 'true'
+    if string_value.lower() in ('true', 'false'):
+        return TYPE_BOOLEAN, string_value.lower() == 'true'
 
     try:
         val = parser.parse(string_value)
