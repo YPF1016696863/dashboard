@@ -391,7 +391,7 @@ def should_schedule_next(previous_iteration, now, interval, time=None, day_of_we
 @python_2_unicode_compatible
 @gfk_type
 @generic_repr('id', 'name', 'query_hash', 'version', 'user_id', 'org_id',
-              'data_source_id', 'query_hash', 'last_modified_by_id',
+              'data_source_id','description','query_hash', 'last_modified_by_id',
               'is_archived', 'is_draft', 'schedule', 'schedule_failures')
 class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     id = Column(db.Integer, primary_key=True)
@@ -815,7 +815,8 @@ def generate_slug(ctx):
 
 @python_2_unicode_compatible
 @gfk_type
-@generic_repr('id', 'name', 'slug', 'user_id', 'org_id', 'version', 'is_archived', 'is_draft', 'background_image')
+@generic_repr('id', 'name', 'slug', 'user_id', 'org_id', 'description', 'type', 'version', 'is_archived', 'is_draft',
+              'background_image')
 class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     id = Column(db.Integer, primary_key=True)
     version = Column(db.Integer)
@@ -825,6 +826,8 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
     name = Column(db.String(100))
     user_id = Column(db.Integer, db.ForeignKey("users.id"))
     user = db.relationship(User)
+    description = Column(db.String(4096), nullable=True)
+    type = Column(db.String(100), nullable=True)
     # layout is no longer used, but kept so we know how to render old dashboards.
     layout = Column(db.Text)
     background_image = Column(db.String(1024), nullable=True)
@@ -921,7 +924,7 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
 
 @python_2_unicode_compatible
 @gfk_type
-@generic_repr('id', 'name', 'type', 'query_id', 'is_archived', 'version')
+@generic_repr('id', 'name', 'type', 'query_id', 'description','is_archived', 'version')
 class Visualization(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     id = Column(db.Integer, primary_key=True)
     version = Column(db.Integer, default=1)

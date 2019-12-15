@@ -225,7 +225,9 @@ def serialize_dashboard(obj, with_widgets=False, user=None, with_favorite_state=
         'updated_at': obj.updated_at,
         'created_at': obj.created_at,
         'version': obj.version,
-        'background_image': obj.background_image
+        'background_image': obj.background_image,
+        'description': obj.description,
+        'type': obj.type
     }
 
     if with_favorite_state:

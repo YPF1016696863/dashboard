@@ -43,7 +43,7 @@ class DashboardListResource(BaseResource):
         objects.
         """
         search_term = request.args.get('q')
-        viz_id = request.args.get('visid')
+        viz_id = request.args.get('vis')
 
         if search_term:
             results = models.Dashboard.search(
@@ -109,6 +109,8 @@ class DashboardListResource(BaseResource):
                                      org=self.current_org,
                                      user=self.current_user,
                                      is_draft=True,
+                                     description=dashboard_properties.get('description', ''),
+                                     type=dashboard_properties.get('type', ''),
                                      layout='[]')
         models.db.session.add(dashboard)
         models.db.session.commit()
@@ -187,7 +189,8 @@ class DashboardResource(BaseResource):
         require_object_modify_permission(dashboard, self.current_user)
 
         updates = project(dashboard_properties, ('name', 'layout', 'version', 'tags',
-                                                 'is_draft', 'dashboard_filters_enabled', 'background_image'))
+                                                 'is_draft', 'dashboard_filters_enabled', 'background_image',
+                                                 'description', 'type'))
 
         # SQLAlchemy handles the case where a concurrent transaction beats us
         # to the update. But we still have to make sure that we're not starting
