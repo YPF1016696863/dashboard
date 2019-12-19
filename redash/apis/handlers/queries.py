@@ -125,7 +125,8 @@ class BaseQueryListResource(BaseResource):
         ordered_results = order_results(results, fallback=not bool(search_term))
 
         if request.args.has_key('all'):
-            response = [serialize_query(result, with_stats=True, with_last_modified_by=False, with_visualizations=True) for result in ordered_results]
+            response = [serialize_query(result, with_stats=True, with_last_modified_by=False, with_visualizations=True)
+                        for result in ordered_results]
         else:
             page = request.args.get('page', 1, type=int)
             page_size = request.args.get('page_size', 25, type=int)
@@ -345,7 +346,17 @@ class QueryResource(BaseResource):
         q = get_object_or_404(models.Query.get_by_id_and_org, query_id, self.current_org)
         require_access(q, self.current_user, view_only)
 
+        api_key_hash = {}
+        for vis in q.visualizations:
+            api_key = models.ApiKey.get_by_object(vis)
+            if api_key:
+                api_key_hash[vis.id] = api_key.api_key
+
         result = QuerySerializer(q, with_visualizations=True).serialize()
+        for vis_result in result['visualizations']:
+            if vis_result['id'] in api_key_hash:
+                vis_result['api_key'] = api_key_hash[vis_result['id']]
+
         result['can_edit'] = can_modify(q, self.current_user)
 
         self.record_event({
