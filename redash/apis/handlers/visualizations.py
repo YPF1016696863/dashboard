@@ -124,6 +124,11 @@ class VisualizationResource(BaseResource):
         require_access(vis.query_rel, self.current_user, view_only)
 
         result = serialize_visualization(vis, True)
+
+        api_key = models.ApiKey.get_by_object(vis)
+        if api_key:
+            result['api_key'] = api_key.api_key
+
         result['can_edit'] = can_modify(vis, self.current_user)
 
         self.record_event({
