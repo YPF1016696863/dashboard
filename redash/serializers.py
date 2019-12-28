@@ -227,7 +227,7 @@ def serialize_dashboard(obj, with_widgets=False, user=None, with_favorite_state=
         'version': obj.version,
         'background_image': obj.background_image,
         'description': obj.description,
-        'type': obj.type
+        'type': obj.type or 'dashboard'
     }
 
     if with_favorite_state:
@@ -252,7 +252,7 @@ def serialize_dashboard_overview(obj, user=None):
         'visualizations': visualizations,
         'updated_at': obj.updated_at,
         'created_at': obj.created_at,
-        'type': obj.type
+        'type': obj.type or 'dashboard'
     }
 
     return d
