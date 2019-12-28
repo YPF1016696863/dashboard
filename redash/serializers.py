@@ -241,8 +241,8 @@ def serialize_dashboard_overview(obj, user=None):
     visualizations = []
 
     for w in obj.widgets:
-        if user and has_access(w.visualization.query_rel, user, view_only):
-            if w.visualization_id is not None:
+        if w.visualization_id is not None:
+            if user and has_access(w.visualization.query_rel, user, view_only):
                 visualizations.append(w.visualization_id)
 
     d = {
