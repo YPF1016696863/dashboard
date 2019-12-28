@@ -234,3 +234,25 @@ def serialize_dashboard(obj, with_widgets=False, user=None, with_favorite_state=
         d['is_favorite'] = models.Favorite.is_favorite(current_user.id, obj)
 
     return d
+
+def serialize_dashboard_overview(obj, user=None):
+    layout = json_loads(obj.layout)
+
+    visualizations = []
+
+    for w in obj.widgets:
+        if user and has_access(w.visualization.query_rel, user, view_only):
+            if w.visualization_id is not None:
+                visualizations.append(w.visualization_id)
+
+    d = {
+        'id': obj.id,
+        'slug': obj.slug,
+        'name': obj.name,
+        'visualizations': visualizations,
+        'updated_at': obj.updated_at,
+        'created_at': obj.created_at,
+        'type': obj.type
+    }
+
+    return d

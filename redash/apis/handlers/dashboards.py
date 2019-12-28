@@ -11,7 +11,7 @@ from redash.permissions import (can_modify, require_admin_or_owner,
                                 require_object_modify_permission,
                                 require_permission)
 from redash.security import csp_allows_embeding
-from redash.serializers import serialize_dashboard
+from redash.serializers import serialize_dashboard, serialize_dashboard_overview
 
 # Ordering map for relationships
 order_map = {
@@ -70,6 +70,8 @@ class DashboardListResource(BaseResource):
 
         if request.args.has_key('all'):
             response = [serialize_dashboard(result) for result in ordered_results]
+        elif request.args.has_key('overview'):
+            response = [serialize_dashboard_overview(result, user=self.current_user) for result in ordered_results]
         else:
             page = request.args.get('page', 1, type=int)
             page_size = request.args.get('page_size', 25, type=int)
