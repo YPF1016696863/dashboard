@@ -12,7 +12,6 @@ from redash.utils import json_loads
 
 
 def public_visualization(visualization):
-    query_data = models.QueryResult.query.get(visualization.query_rel.latest_query_data_id).to_dict()
     return {
         'type': visualization.type,
         'name': visualization.name,
@@ -20,13 +19,7 @@ def public_visualization(visualization):
         'options': json_loads(visualization.options),
         'updated_at': visualization.updated_at,
         'created_at': visualization.created_at,
-        'query': {
-            'query': ' ',  # workaround, as otherwise the query data won't be loaded.
-            'name': visualization.query_rel.name,
-            'description': visualization.query_rel.description,
-            'options': {},
-            'latest_query_data': query_data
-        }
+        'query': serialize_query(visualization.query_rel, with_user=False, with_last_modified_by=False, with_stats=False, with_visualizations=False)
     }
 
 
@@ -94,7 +87,6 @@ def serialize_query(query, with_stats=False, with_visualizations=False, with_use
         'query': query.query_text,
         'query_hash': query.query_hash,
         'schedule': query.schedule,
-        'api_key': query.api_key,
         'is_archived': query.is_archived,
         'is_draft': query.is_draft,
         'updated_at': query.updated_at,
@@ -108,6 +100,7 @@ def serialize_query(query, with_stats=False, with_visualizations=False, with_use
 
     if with_user:
         d['user'] = query.user.to_dict()
+        d['api_key'] = query.api_key
     else:
         d['user_id'] = query.user_id
 
@@ -234,6 +227,7 @@ def serialize_dashboard(obj, with_widgets=False, user=None, with_favorite_state=
         d['is_favorite'] = models.Favorite.is_favorite(current_user.id, obj)
 
     return d
+
 
 def serialize_dashboard_overview(obj, user=None):
     layout = json_loads(obj.layout)
