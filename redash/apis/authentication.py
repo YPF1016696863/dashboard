@@ -127,6 +127,17 @@ def load_user(user_id_with_identity):
         return None
 
 
+@login_manager.header_loader
+def load_user_from_header(header_val):
+    user = None
+    if "Key" in header_val:
+        api_key = header_val.replace('Key ', '', 1)
+        api_key = models.ApiKey.get_by_api_key(api_key)
+        user = models.ApiUser(api_key, api_key.org, [])
+
+    return user
+
+
 @login_manager.unauthorized_handler
 def handle_unauthorized():
     return json_response_with_status({

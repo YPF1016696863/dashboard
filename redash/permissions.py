@@ -44,7 +44,9 @@ def has_access_to_groups(obj, user, need_view_only):
 
 
 def require_access(obj, user, need_view_only):
-    if not has_access(obj, user, need_view_only):
+    # TODO: WORKAROUND:
+    # when it is an API key, always allow it
+    if not user.is_api_user() and not has_access(obj, user, need_view_only):
         abort(403)
 
 
@@ -55,7 +57,12 @@ class require_permissions(object):
     def __call__(self, fn):
         @functools.wraps(fn)
         def decorated(*args, **kwargs):
-            has_permissions = current_user.has_permissions(self.permissions)
+            # TODO: WORKAROUND:
+            # when it is an API key, always allow it
+            if current_user.is_api_user:
+                has_permissions = True
+            else:
+                has_permissions = current_user.has_permissions(self.permissions)
 
             if has_permissions:
                 return fn(*args, **kwargs)

@@ -148,7 +148,8 @@ class QueryResultResource(BaseResource):
 
         allow_executing_with_view_only_permissions = query.parameterized.is_safe
 
-        if has_access(query, self.current_user, allow_executing_with_view_only_permissions):
+        # TODO: Workaround, always allow APIKEY user
+        if self.current_user.is_api_user or has_access(query, self.current_user, allow_executing_with_view_only_permissions):
             return run_query(query.parameterized, parameter_values, query.data_source, query_id, max_age)
         else:
             return {'job': {'status': 4,
