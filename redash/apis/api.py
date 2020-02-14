@@ -42,6 +42,10 @@ from redash.apis.handlers.query_results import (JobResource,
                                                 QueryResultResource)
 from redash.apis.handlers.query_snippets import (QuerySnippetListResource,
                                                  QuerySnippetResource)
+
+from redash.apis.handlers.folder_structures import (FolderStructureResource,
+                                                    FolderStructureListResource)
+
 from redash.apis.handlers.settings import OrganizationSettings
 from redash.apis.handlers.users import (UserDisableResource, UserInviteResource,
                                         UserListResource,
