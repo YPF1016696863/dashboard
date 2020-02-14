@@ -167,3 +167,6 @@ api.add_resource(QuerySnippetResource, '/api/query_snippets/<snippet_id>', endpo
 api.add_resource(QuerySnippetListResource, '/api/query_snippets', endpoint='query_snippets')
 
 api.add_resource(OrganizationSettings, '/api/settings/organization', endpoint='organization_settings')
+
+api.add_resource(FolderStructureResource, '/api/folder_structures/<structure_id>', endpoint='folder_structure')
+api.add_resource(FolderStructureListResource, '/api/folder_structures', endpoint='folder_structures')

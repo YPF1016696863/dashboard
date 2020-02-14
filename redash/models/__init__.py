@@ -1240,6 +1240,33 @@ class QuerySnippet(TimestampMixin, db.Model, BelongsToOrgMixin):
 
         return d
 
+@generic_repr('id', 'parent_id', 'name', 'catalog')
+class FolderStructure(db.Model):
+    id = Column(db.Integer, primary_key=True)
+    parent_id = Column(db.Integer, db.ForeignKey("folder_structures.id"))
+    name = Column(db.String(255), nullable=False, default="New Folder")
+    catalog = Column(db.String(255), nullable=False)
+
+
+    __tablename__ = 'folder_structures'
+
+    @classmethod
+    def get_by_id(cls, structure_id):
+        return cls.query.filter(cls.id == structure_id).one()
+
+    @classmethod
+    def all(cls):
+        return cls.query.order_by(cls.id.asc())
+
+    def to_dict(self):
+        d = {
+            'id': self.id,
+            'parent_id': self.parent_id,
+            'name': self.name,
+            'catalog': self.catalog
+        }
+
+        return d
 
 def init_db():
     default_org = Organization(name="Default", slug='default', settings={})
