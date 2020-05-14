@@ -184,19 +184,21 @@ class UserResetPasswordResource(BaseResource):
     @require_admin
     def post(self, user_id):
         user = models.User.get_by_id(user_id)
+
+        req = request.get_json(True)
+
+        params = project(req, ('password'))
+
+        if 'password' not in params:
+            abort(403, message="Must provide initial password to reset.")
+
         if user.is_disabled:
             abort(404, message='Not found')
 
-        reset_link = reset_link_for_user(user)
-        email_sent = False
-
-        if settings.email_server_is_configured():
-            send_password_reset_email(user, reset_link)
-            email_sent = True
+        user.hash_password(params.pop('password'))
 
         return {
-            'reset_link': reset_link,
-            'email_sent': email_sent
+            'status': 'ok'
         }
 
 
