@@ -39,11 +39,11 @@ order_results = partial(
 def invite_user(inviter, user, send_email=True):
     d = user.to_dict()
 
-    invite_url = invite_link_for_user(user)
-    if settings.email_server_is_configured() and send_email:
-        send_invite_email(inviter, user, invite_url)
-    else:
-        d['invite_link'] = invite_url
+    # invite_url = invite_link_for_user(user)
+    #if settings.email_server_is_configured() and send_email:
+    #    send_invite_email(inviter, user, invite_url)
+    #else:
+    #    d['invite_link'] = invite_url
 
     return d
 
@@ -149,17 +149,10 @@ class UserListResource(BaseResource):
         req = request.get_json(force=True)
         require_fields(req, ('name', 'email'))
 
-        if '@' not in req['email']:
-            abort(400, message='Bad email address.')
-        name, domain = req['email'].split('@', 1)
-
-        if domain.lower() in blacklist or domain.lower() == 'qq.com':
-            abort(400, message='Bad email address.')
-
         user = models.User(org=self.current_org,
                            name=req['name'],
                            email=req['email'],
-                           is_invitation_pending=True,
+                           is_invitation_pending=False,
                            group_ids=[self.current_org.default_group.id])
 
         try:
@@ -167,7 +160,7 @@ class UserListResource(BaseResource):
             models.db.session.commit()
         except IntegrityError as e:
             if "email" in e.message:
-                abort(400, message='Email already taken.')
+                abort(400, message='Username already taken.')
             abort(500)
 
         self.record_event({
@@ -336,23 +329,9 @@ class UserResource(BaseResource):
             if len(params['group_ids']) == 0:
                 params.pop('group_ids')
 
-        if 'email' in params:
-            _, domain = params['email'].split('@', 1)
-
-            if domain.lower() in blacklist or domain.lower() == 'qq.com':
-                abort(400, message='Bad email address.')
-
-        email_address_changed = 'email' in params and params['email'] != user.email
-        needs_to_verify_email = email_address_changed and settings.email_server_is_configured()
-        if needs_to_verify_email:
-            user.is_email_verified = False
-
         try:
             self.update_model(user, params)
             models.db.session.commit()
-
-            if needs_to_verify_email:
-                send_verify_email(user)
 
             # The user has updated their email or password. This should invalidate all _other_ sessions,
             # forcing them to log in again. Since we don't want to force _this_ session to have to go
@@ -361,7 +340,7 @@ class UserResource(BaseResource):
                 login_user(user, remember=True)
         except IntegrityError as e:
             if "email" in e.message:
-                message = "Email already taken."
+                message = "Username already taken."
             else:
                 message = "Error updating record"
 
