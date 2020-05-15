@@ -154,6 +154,8 @@ class UserListResource(BaseResource):
                            email=req['email'],
                            is_invitation_pending=False,
                            group_ids=[self.current_org.default_group.id])
+        
+        user.hash_password('Abcd1234')
 
         try:
             models.db.session.add(user)
