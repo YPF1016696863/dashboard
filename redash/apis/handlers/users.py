@@ -330,8 +330,8 @@ class UserResource(BaseResource):
                 except NoResultFound:
                     abort(400, message="Group id {} is invalid.".format(group_id))
 
-            if len(params['group_ids']) == 0:
-                params.pop('group_ids')
+            #if len(params['group_ids']) == 0:
+            #    params.pop('group_ids')
 
         try:
             self.update_model(user, params)
