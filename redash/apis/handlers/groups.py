@@ -10,7 +10,14 @@ class GroupListResource(BaseResource):
     @require_admin
     def post(self):
         name = request.json['name']
-        group = models.Group(name=name, org=self.current_org)
+        isAdmin = request.json['isAdmin']
+        permission = models.Group.DEFAULT_PERMISSIONS
+
+        if isAdmin.lower() == 'true':
+            permission = models.Group.REGULAR_ADMIN_PERMISSIONS
+
+        group = models.Group(name=name, permissions=permission, org=self.current_org, type=models.Group.REGULAR_GROUP)
+
         models.db.session.add(group)
         models.db.session.commit()
 
