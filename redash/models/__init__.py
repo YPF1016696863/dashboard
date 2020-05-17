@@ -118,7 +118,7 @@ class DataSource(BelongsToOrgMixin, db.Model):
         data_source = cls(*args, **kwargs)
         data_source_group = DataSourceGroup(
             data_source=data_source,
-            group=data_source.org.default_group)
+            group=data_source.org.admin_group)
         db.session.add_all([data_source, data_source_group])
         return data_source
 
@@ -1271,10 +1271,8 @@ class FolderStructure(db.Model):
 def init_db():
     default_org = Organization(name="Default", slug='default', settings={})
     admin_group = Group(name='admin', permissions=['admin', 'super_admin'], org=default_org, type=Group.BUILTIN_GROUP)
-    default_group = Group(name='default', permissions=Group.DEFAULT_PERMISSIONS, org=default_org,
-                          type=Group.BUILTIN_GROUP)
 
-    db.session.add_all([default_org, admin_group, default_group])
+    db.session.add_all([default_org, admin_group])
     # XXX remove after fixing User.group_ids
     db.session.commit()
-    return default_org, admin_group, default_group
+    return default_org, admin_group

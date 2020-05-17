@@ -220,7 +220,6 @@ class User(TimestampMixin, db.Model, BelongsToOrgMixin, UserMixin, PermissionsCh
 
     def update_group_assignments(self, group_names):
         groups = Group.find_by_name(self.org, group_names)
-        groups.append(self.org.default_group)
         self.group_ids = [g.id for g in groups]
         db.session.add(self)
         db.session.commit()
@@ -238,9 +237,7 @@ class User(TimestampMixin, db.Model, BelongsToOrgMixin, UserMixin, PermissionsCh
 @python_2_unicode_compatible
 @generic_repr('id', 'name', 'type', 'org_id')
 class Group(db.Model, BelongsToOrgMixin):
-    DEFAULT_PERMISSIONS = ['create_dashboard', 'create_query', 'edit_dashboard', 'edit_query',
-                           'view_query', 'view_source', 'execute_query', 'list_users', 'schedule_query',
-                           'list_dashboards', 'list_alerts', 'list_data_sources']
+    DEFAULT_PERMISSIONS = []
 
     ADMIN_PERMISSIONS = ['admin', 'super_admin', 'create_dashboard', 'create_query', 'edit_dashboard', 'edit_query',
         'view_query', 'view_source', 'execute_query', 'list_users', 'schedule_query',

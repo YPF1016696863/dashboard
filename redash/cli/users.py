@@ -21,7 +21,7 @@ def build_groups(org, groups, is_admin):
         groups = [int(g) for g in groups]
 
     if groups is None:
-        groups = [org.default_group.id]
+        groups = []
 
     if is_admin:
         groups += [org.admin_group.id]
@@ -127,14 +127,12 @@ def create_root(email, name, google_auth=False, password=None, organization='def
 
     admin_group = models.Group(name='admin', permissions=['admin', 'super_admin'],
                                org=default_org, type=models.Group.BUILTIN_GROUP)
-    default_group = models.Group(name='default', permissions=models.Group.DEFAULT_PERMISSIONS,
-                                 org=default_org, type=models.Group.BUILTIN_GROUP)
 
-    models.db.session.add_all([default_org, admin_group, default_group])
+    models.db.session.add_all([default_org, admin_group])
     models.db.session.commit()
 
     user = models.User(org=default_org, email=email, name=name,
-                       group_ids=[admin_group.id, default_group.id])
+                       group_ids=[admin_group.id])
     if not google_auth:
         user.hash_password(password)
 
@@ -246,7 +244,7 @@ def list(organization=None):
         if i > 0:
             print("-" * 20)
 
-        print("Id: {}\nName: {}\nEmail: {}\nOrganization: {}\nActive: {}".format(
+        print("Id: {}\nName: {}\nUserName: {}\nOrganization: {}\nActive: {}".format(
             user.id, user.name.encode('utf-8'), user.email, user.org.name, not (user.is_disabled)))
 
         groups = models.Group.query.filter(models.Group.id.in_(user.group_ids)).all()

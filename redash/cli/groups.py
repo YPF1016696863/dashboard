@@ -74,7 +74,7 @@ def change_permissions(group_id, permissions=None):
 
 def extract_permissions_string(permissions):
     if permissions is None:
-        permissions = models.Group.DEFAULT_PERMISSIONS
+        permissions = []
     else:
         permissions = permissions.split(',')
         permissions = [p.strip() for p in permissions]

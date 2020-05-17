@@ -40,6 +40,10 @@ class Organization(TimestampMixin, db.Model):
         return self.groups.filter(Group.name == 'default', Group.type == Group.BUILTIN_GROUP).first()
 
     @property
+    def admin_group(self):
+        return self.groups.filter(Group.name == 'admin', Group.type == Group.BUILTIN_GROUP).first()
+
+    @property
     def google_apps_domains(self):
         return self.settings.get(self.SETTING_GOOGLE_APPS_DOMAINS, [])
 
