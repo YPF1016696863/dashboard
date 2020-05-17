@@ -13,7 +13,7 @@ class GroupListResource(BaseResource):
         isAdmin = request.json['isAdmin']
         permission = models.Group.DEFAULT_PERMISSIONS
 
-        if isAdmin.lower() == 'true':
+        if isAdmin == True:
             permission = models.Group.REGULAR_ADMIN_PERMISSIONS
 
         group = models.Group(name=name, permissions=permission, org=self.current_org, type=models.Group.REGULAR_GROUP)
