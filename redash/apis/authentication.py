@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 def create_org(org_name, user_name, email, password):
-    default_org = Organization(name=org_name, slug='default', settings={})
-    admin_group = Group(name='admin', permissions=['admin', 'super_admin'], org=default_org, type=Group.BUILTIN_GROUP)
+    default_org = Organization(name=org_name, slug='', settings={})
+    admin_group = Group(name='admin', permissions=Group.ADMIN_PERMISSIONS, org=default_org, type=Group.BUILTIN_GROUP)
 
     # Disable default group
     # default_group = Group(name='default', permissions=Group.DEFAULT_PERMISSIONS, org=default_org,
