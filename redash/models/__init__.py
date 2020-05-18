@@ -922,6 +922,19 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
         return func.lower(cls.name)
 
 
+@generic_repr('id', 'dashboard_id', 'group_id', 'view_only')
+class DashboardGroup(db.Model):
+    # XXX drop id, use datasource/group as PK
+    id = Column(db.Integer, primary_key=True)
+    dashboard_id = Column(db.Integer, db.ForeignKey("dashboards.id"))
+    dashboard = db.relationship(Dashboard, back_populates="dashboard_groups")
+    group_id = Column(db.Integer, db.ForeignKey("groups.id"))
+    group = db.relationship(Group, back_populates="dashboards")
+    view_only = Column(db.Boolean, default=False)
+
+    __tablename__ = "dashboard_groups"
+
+
 @python_2_unicode_compatible
 @gfk_type
 @generic_repr('id', 'name', 'type', 'query_id', 'description','is_archived', 'version')
