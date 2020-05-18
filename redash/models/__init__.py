@@ -837,6 +837,9 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
     widgets = db.relationship('Widget', backref='dashboard', lazy='dynamic')
     tags = Column('tags', MutableList.as_mutable(postgresql.ARRAY(db.Unicode)), nullable=True)
 
+    dashboard_groups = db.relationship("DashboardGroup", back_populates="dashboard",
+                                         cascade="all")
+
     __tablename__ = 'dashboards'
     __mapper_args__ = {
         "version_id_col": version
@@ -844,6 +847,17 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
 
     def __str__(self):
         return u"%s=%s" % (self.id, self.name)
+
+    @classmethod
+    def create_with_group(cls, *args, **kwargs):
+        dashboard = cls(*args, **kwargs)
+        group = cls(*args, **kwargs)
+        dashboard_group = DashboardGroup(
+            dashboard=dashboard,
+            group=group)
+        db.session.add_all([dashboard, dashboard_group])
+        return dashboard
+
 
     @classmethod
     def all(cls, org, group_ids, user_id, viz_id=None):
@@ -910,6 +924,26 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
     @classmethod
     def get_by_slug_and_org(cls, slug, org):
         return cls.query.filter(cls.slug == slug, cls.org == org).one()
+
+    def add_group(self, group, view_only=False):
+        dsg = DashboardGroup(group=group, dashboard=self, view_only=view_only)
+        db.session.add(dsg)
+        return dsg
+
+    def remove_group(self, group):
+        DashboardGroup.query.filter(
+            DashboardGroup.group == group,
+            DashboardGroup.dashboard == self
+        ).delete()
+        db.session.commit()
+
+    def update_group_permission(self, group, view_only):
+        dsg = DashboardGroup.query.filter(
+            DashboardGroup.group == group,
+            DashboardGroup.dashboard == self).one()
+        dsg.view_only = view_only
+        db.session.add(dsg)
+        return dsg
 
     @hybrid_property
     def lowercase_name(self):

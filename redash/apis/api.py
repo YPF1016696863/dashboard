@@ -27,6 +27,9 @@ from redash.apis.handlers.groups import (GroupDataSourceListResource,
                                          GroupDataSourceResource, GroupListResource,
                                          GroupMemberListResource,
                                          GroupMemberResource, GroupResource)
+
+from redash.apis.handlers.groups import (GroupDashboardListResource)
+
 from redash.apis.handlers.permissions import (CheckPermissionResource,
                                               ObjectPermissionsListResource)
 from redash.apis.handlers.queries import (MyQueriesResource, QueryArchiveResource,
@@ -104,6 +107,8 @@ api.add_resource(GroupMemberResource, '/api/groups/<group_id>/members/<user_id>'
 api.add_resource(GroupDataSourceListResource, '/api/groups/<group_id>/data_sources', endpoint='group_data_sources')
 api.add_resource(GroupDataSourceResource, '/api/groups/<group_id>/data_sources/<data_source_id>',
                  endpoint='group_data_source')
+
+api.add_resource(GroupDashboardListResource, '/api/groups/<group_id>/dashboards', endpoint='group_dashboards')
 
 api.add_resource(EventsResource, '/api/events', endpoint='events')
 

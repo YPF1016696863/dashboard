@@ -139,7 +139,6 @@ def serialize_data_source_with_group(data_source, data_source_group):
     d['view_only'] = data_source_group.view_only
     return d
 
-
 class GroupDataSourceListResource(BaseResource):
     @require_admin
     def post(self, group_id):
@@ -212,3 +211,47 @@ class GroupDataSourceResource(BaseResource):
             'object_type': 'group',
             'member_id': data_source.id
         })
+
+
+def serialize_dashboard_with_group(dashboard, dashboard_group):
+    d = dashboard.to_dict()
+    d['view_only'] = dashboard_group.view_only
+    return d
+
+class GroupDashboardListResource(BaseResource):
+    @require_admin
+    def post(self, group_id):
+        dashboard_id = request.json['dashboard_id']
+        dashboard = models.Dashboard.get_by_id_and_org(dashboard_id, self.current_org)
+        group = models.Group.get_by_id_and_org(group_id, self.current_org)
+
+        dashboard_group = dashboard.add_group(group)
+        models.db.session.commit()
+
+        self.record_event({
+            'action': 'add_dashboard',
+            'object_id': group_id,
+            'object_type': 'group',
+            'member_id': dashboard.id
+        })
+
+        return serialize_dashboard_with_group(dashboard, dashboard_group)
+
+    @require_admin
+    def get(self, group_id):
+        group = get_object_or_404(models.Group.get_by_id_and_org, group_id,
+                                  self.current_org)
+
+        # TOOD: move to models
+        dashboards = (models.Dashboard.query
+                        .join(models.DashboardGroup)
+                        .filter(models.DashboardGroup.group == group))
+
+        self.record_event({
+            'action': 'list',
+            'object_id': group_id,
+            'object_type': 'group',
+        })
+
+        return [dshboard.to_dict(with_permissions_for=group) for dshboard in dashboards]
+
