@@ -845,6 +845,27 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
         "version_id_col": version
     }
 
+    def to_dict(self, all=False, with_permissions_for=None):
+    d = {
+        'id': self.id,
+        'name': self.name,
+        'type': self.type,
+        'is_draft': self.is_draft,
+        'description': self.description
+    }
+
+    if all:
+        d['user'] = self.user.to_dict()
+        d['widgets'] = self.widgets.to_dict()
+        d['groups'] = self.groups.to_dict()
+
+    if with_permissions_for is not None:
+        d['view_only'] = db.session.query(DashboardGroup.view_only).filter(
+            DashboardGroup.group == with_permissions_for,
+            DashboardGroup.dashboard == self).one()[0]
+
+    return d
+
     def __str__(self):
         return u"%s=%s" % (self.id, self.name)
 
