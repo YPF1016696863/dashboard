@@ -270,14 +270,21 @@ class Group(db.Model, BelongsToOrgMixin):
     def __str__(self):
         return text_type(self.id)
 
-    def to_dict(self):
-        return {
+    def to_dict(self, with_permissions_for=None):
+        d = {
             'id': self.id,
             'name': self.name,
             'permissions': self.permissions,
             'type': self.type,
             'created_at': self.created_at
         }
+
+        if with_permissions_for is not None:
+            d['view_only'] = db.session.query(DashboardGroup.view_only).filter(
+                DashboardGroup.dashboard == with_permissions_for,
+                DashboardGroup.group == self).one()[0]
+
+        return d
 
     @classmethod
     def all(cls, org):

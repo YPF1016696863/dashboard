@@ -218,6 +218,11 @@ def serialize_dashboard_with_group(dashboard, dashboard_group):
     d['view_only'] = dashboard_group.view_only
     return d
 
+def serialize_groups_with_viewonly(group, dashboard_group):
+    d = group.to_dict()
+    d['view_only'] = dashboard_group.view_only
+    return d
+
 class GroupDashboardListResource(BaseResource):
     @require_admin
     def post(self, group_id):
@@ -306,4 +311,4 @@ class GroupDashboardListDashboardResource(BaseResource):
             'object_type': 'group',
         })
 
-        return [g.to_dict() for g in groups]
+        return [g.to_dict(with_permissions_for=dashboard) for g in groups]
