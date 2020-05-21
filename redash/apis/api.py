@@ -109,8 +109,8 @@ api.add_resource(GroupDataSourceResource, '/api/groups/<group_id>/data_sources/<
                  endpoint='group_data_source')
 api.add_resource(GroupDashboardListResource, '/api/groups/<group_id>/dashboards', endpoint='group_dashboards')
 api.add_resource(GroupDashboardListDashboardResource, '/api/groups/<dashboard_id>/groups', endpoint='group_dashboards_list')
-api.add_resource(GroupDashboardResource, '/api/groups/<group_id>/dashboards/<dashboard_id>/viewonly',
-                 endpoint='group_dashboard_viewonly')
+api.add_resource(GroupDashboardResource, '/api/groups/<group_id>/dashboards/<dashboard_id>',
+                 endpoint='group_dashboard')
 
 api.add_resource(EventsResource, '/api/events', endpoint='events')
 
