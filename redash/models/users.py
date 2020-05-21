@@ -237,7 +237,7 @@ class User(TimestampMixin, db.Model, BelongsToOrgMixin, UserMixin, PermissionsCh
 @python_2_unicode_compatible
 @generic_repr('id', 'name', 'type', 'org_id')
 class Group(db.Model, BelongsToOrgMixin):
-    DEFAULT_PERMISSIONS = []
+    DEFAULT_PERMISSIONS = ['user']
 
     ADMIN_PERMISSIONS = ['admin', 'super_admin', 'create_dashboard', 'create_query', 'edit_dashboard', 'edit_query',
         'view_query', 'view_source', 'execute_query', 'list_users', 'schedule_query',
@@ -296,7 +296,7 @@ class Group(db.Model, BelongsToOrgMixin):
 
     @classmethod
     def nonAdminGroup(cls):
-        result = cls.query.filter(not cls.permissions.any('admin'))
+        result = cls.query.filter(cls.permissions.any('user'))
         return list(result)
 
 
