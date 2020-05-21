@@ -26,6 +26,7 @@ from redash.apis.handlers.favorites import (DashboardFavoriteResource,
 from redash.apis.handlers.groups import (GroupDataSourceListResource,
                                          GroupDataSourceResource, GroupListResource,
                                          GroupDashboardListResource,GroupDashboardResource,
+                                         GroupDashboardListDashboardResource,
                                          GroupMemberListResource,
                                          GroupMemberResource, GroupResource)
 
@@ -107,6 +108,7 @@ api.add_resource(GroupDataSourceListResource, '/api/groups/<group_id>/data_sourc
 api.add_resource(GroupDataSourceResource, '/api/groups/<group_id>/data_sources/<data_source_id>',
                  endpoint='group_data_source')
 api.add_resource(GroupDashboardListResource, '/api/groups/<group_id>/dashboards', endpoint='group_dashboards')
+api.add_resource(GroupDashboardListDashboardResource, '/api/groups/<dashboard_id>/groups', endpoint='group_dashboards_list')
 api.add_resource(GroupDashboardResource, '/api/groups/<group_id>/dashboards/<dashboard_id>',
                  endpoint='group_dashboard')
 

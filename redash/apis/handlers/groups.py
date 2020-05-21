@@ -290,3 +290,20 @@ class GroupDashboardResource(BaseResource):
             'member_id': dashboard.id
         })
 
+class GroupDashboardListDashboardResource(BaseResource):
+    def get(self, dashboard_id):
+        dashboard = get_object_or_404(models.Dashboard.get_by_id_and_org, dashboard_id,
+                                  self.current_org)
+
+        # TOOD: move to models
+        groups = (models.Group.query
+                        .join(models.DashboardGroup)
+                        .filter(models.DashboardGroup.dashboard == dashboard))
+
+        self.record_event({
+            'action': 'list',
+            'object_id': dashboard_id,
+            'object_type': 'group',
+        })
+
+        return return [g.to_dict() for g in groups]
