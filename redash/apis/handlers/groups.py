@@ -306,4 +306,4 @@ class GroupDashboardListDashboardResource(BaseResource):
             'object_type': 'group',
         })
 
-        return return [g.to_dict() for g in groups]
+        return [g.to_dict() for g in groups]
