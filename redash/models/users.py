@@ -294,6 +294,11 @@ class Group(db.Model, BelongsToOrgMixin):
         result = cls.query.filter(cls.org == org, cls.name.in_(group_names))
         return list(result)
 
+    @classmethod
+    def nonAdminGroup(cls):
+        result = cls.query.filter(not cls.permissions.any('admin'))
+        return list(result)
+
 
 @generic_repr('id', 'object_type', 'object_id', 'access_type', 'grantor_id', 'grantee_id')
 class AccessPermission(GFKBase, db.Model):

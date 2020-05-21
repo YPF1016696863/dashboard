@@ -31,7 +31,11 @@ class GroupListResource(BaseResource):
 
     def get(self):
         if self.current_user.has_permission('admin'):
-            groups = models.Group.all(self.current_org)
+            pfilter = request.args.get('filter')
+            if pfilter is not None:
+                groups = models.Group.nonAdminGroup()
+            else:
+                groups = models.Group.all(self.current_org)
         else:
             groups = models.Group.query.filter(
                 models.Group.id.in_(self.current_user.group_ids))
