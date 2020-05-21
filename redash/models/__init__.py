@@ -989,6 +989,9 @@ class DashboardGroup(db.Model):
 
     __tablename__ = "dashboard_groups"
 
+    @classmethod
+    def get_by_dashboard_group(cls, dshboard, group):
+        return cls.query.filter(cls.dashboard_id == dshboard.id, cls.group_id == group.id).one()
 
 @python_2_unicode_compatible
 @gfk_type

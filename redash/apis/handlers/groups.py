@@ -311,4 +311,4 @@ class GroupDashboardListDashboardResource(BaseResource):
             'object_type': 'group',
         })
 
-        return [g.to_dict(with_permissions_for=dashboard) for g in groups]
+        return [serialize_groups_with_viewonly(g, models.DashboardGroup.get_by_dashboard_group(dashboard, g)) for g in groups]
