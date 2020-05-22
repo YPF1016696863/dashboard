@@ -206,7 +206,7 @@ def serialize_dashboard(obj, with_widgets=False, user=None, with_favorite_state=
         'slug': obj.slug,
         'name': obj.name,
         'user_id': current_user.id,
-        'created_by': obj.user_id,
+        'created_by': obj.user.to_dict(),
         'user': current_user.to_dict(),
         'layout': layout,
         'dashboard_filters_enabled': obj.dashboard_filters_enabled,
