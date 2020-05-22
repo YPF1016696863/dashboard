@@ -87,6 +87,8 @@ def require_super_admin(fn):
 def has_permission_or_owner(permission, object_owner_id):
     return int(object_owner_id) == current_user.id or current_user.has_permission(permission)
 
+def has_permission(permission):
+    return current_user.has_permission(permission)
 
 def is_admin_or_owner(object_owner_id):
     return has_permission_or_owner('admin', object_owner_id)

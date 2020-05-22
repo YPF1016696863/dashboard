@@ -205,16 +205,15 @@ def serialize_dashboard(obj, with_widgets=False, user=None, with_favorite_state=
         'id': obj.id,
         'slug': obj.slug,
         'name': obj.name,
-        'user_id': obj.user_id,
-        # TODO: we should properly load the users
-        'user': obj.user.to_dict(),
+        'user_id': current_user.id,
+        'created_by': obj.user_id,
+        'user': current_user.to_dict(),
         'layout': layout,
         'dashboard_filters_enabled': obj.dashboard_filters_enabled,
         'widgets': widgets,
         'is_archived': obj.is_archived,
         'is_draft': obj.is_draft,
         'tags': obj.tags or [],
-        # TODO: bulk load favorites
         'updated_at': obj.updated_at,
         'created_at': obj.created_at,
         'version': obj.version,
@@ -223,8 +222,7 @@ def serialize_dashboard(obj, with_widgets=False, user=None, with_favorite_state=
         'type': obj.type or 'dashboard'
     }
 
-    if with_favorite_state:
-        d['is_favorite'] = models.Favorite.is_favorite(current_user.id, obj)
+    d['groups'] = [g.to_dict(with_permissions_for=True) for g in models.DashboardGroup.get_by_dashboard(obj)]
 
     return d
 

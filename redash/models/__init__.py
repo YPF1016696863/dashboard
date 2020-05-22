@@ -33,6 +33,9 @@ from .mixins import BelongsToOrgMixin, TimestampMixin
 from .organizations import Organization
 from .types import EncryptedConfiguration, Configuration, MutableDict, MutableList, PseudoJSON
 from .users import (AccessPermission, AnonymousUser, ApiUser, Group, User)  # noqa
+from redash.permissions import (can_modify, require_admin_or_owner,
+                                require_object_modify_permission,has_permission,
+                                require_permission)
 
 logger = logging.getLogger(__name__)
 
@@ -882,18 +885,50 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
 
     @classmethod
     def all(cls, org, group_ids, user_id, viz_id=None):
+
+        if has_permission('super_admin'):
+            query = (
+                Dashboard.query
+                    .outerjoin(Widget)
+                    .outerjoin(Visualization)
+                    .outerjoin(Query)
+                    .filter(
+                        and_(Dashboard.is_archived == False, Dashboard.org == org)
+                    )
+                    .distinct())
+        else:
+            query = (
+                Dashboard.query
+                    .outerjoin(Widget)
+                    .outerjoin(Visualization)
+                    .outerjoin(Query)
+                    .outerjoin(DataSourceGroup, Query.data_source_id == DataSourceGroup.data_source_id)
+                    .filter(
+                    Dashboard.is_archived == False, (
+                            DataSourceGroup.group_id.in_(group_ids) |
+                            ((Widget.dashboard is not None) & (Widget.visualization is None))
+                    ),
+                    (
+                            (viz_id is None) or (Visualization.id == viz_id)
+                    ),
+                    Dashboard.org == org)
+                    .distinct())
+
+        #query = query.filter(or_(Dashboard.user_id == user_id, Dashboard.is_draft == False))
+        #logger.debug(query)
+        return query
+
+    @classmethod
+    def get_by_dashboard_group(cls, org, group_ids, user_id, viz_id=None):
         query = (
             Dashboard.query
-                .options(
-                subqueryload(Dashboard.user).load_only('_profile_image_url', 'name'),
-            )
                 .outerjoin(Widget)
                 .outerjoin(Visualization)
                 .outerjoin(Query)
-                .outerjoin(DataSourceGroup, Query.data_source_id == DataSourceGroup.data_source_id)
+                .outerjoin(DashboardGroup, Dashboard.id == DashboardGroup.dashboard_id)
                 .filter(
                 Dashboard.is_archived == False, (
-                        DataSourceGroup.group_id.in_(group_ids) |
+                        DashboardGroup.group_id.in_(group_ids) |
                         (Dashboard.user_id == user_id) |
                         ((Widget.dashboard is not None) & (Widget.visualization is None))
                 ),
@@ -989,9 +1024,26 @@ class DashboardGroup(db.Model):
 
     __tablename__ = "dashboard_groups"
 
+    def to_dict(self, with_permissions_for=None):
+        d = {
+            'id': self.id,
+            'group_id': self.group_id,
+            'dashboard_id': self.dashboard_id,
+            'view_only':self.view_only
+        }
+
+        if with_permissions_for is not None:
+            d['group'] = self.group.to_dict()
+
+        return d
+
     @classmethod
     def get_by_dashboard_group(cls, dshboard, group):
         return cls.query.filter(cls.dashboard_id == dshboard.id, cls.group_id == group.id).one()
+
+    @classmethod
+    def get_by_dashboard(cls, dshboard):
+        return cls.query.filter(cls.dashboard_id == dshboard.id)
 
 @python_2_unicode_compatible
 @gfk_type

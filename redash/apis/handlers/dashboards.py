@@ -3,15 +3,19 @@ from flask_restful import abort
 from funcy import project, partial
 from sqlalchemy.orm.exc import StaleDataError
 
+import logging
+
 from redash import models, serializers
 from redash.apis.handlers.base import (BaseResource, get_object_or_404, paginate,
                                        filter_by_tags,
                                        order_results as _order_results)
 from redash.permissions import (can_modify, require_admin_or_owner,
-                                require_object_modify_permission,
+                                require_object_modify_permission,has_permission,
                                 require_permission)
 from redash.security import csp_allows_embeding
 from redash.serializers import serialize_dashboard, serialize_dashboard_overview
+
+logger = logging.getLogger(__name__)
 
 # Ordering map for relationships
 order_map = {
@@ -29,7 +33,6 @@ order_results = partial(
 
 
 class DashboardListResource(BaseResource):
-    @require_permission('list_dashboards')
     def get(self):
         """
         Lists all accessible dashboards.
@@ -45,16 +48,24 @@ class DashboardListResource(BaseResource):
         search_term = request.args.get('q')
         viz_id = request.args.get('vis')
 
-        if search_term:
-            results = models.Dashboard.search(
-                self.current_org,
-                self.current_user.group_ids,
-                self.current_user.id,
-                search_term,
-                viz_id
-            )
+        if has_permission('admin'):
+            if search_term:
+                results = models.Dashboard.search(
+                    self.current_org,
+                    self.current_user.group_ids,
+                    self.current_user.id,
+                    search_term,
+                    viz_id
+                )
+            else:
+                results = models.Dashboard.all(
+                    self.current_org,
+                    self.current_user.group_ids,
+                    self.current_user.id,
+                    viz_id
+                )
         else:
-            results = models.Dashboard.all(
+            results = models.Dashboard.get_by_dashboard_group(
                 self.current_org,
                 self.current_user.group_ids,
                 self.current_user.id,
@@ -97,7 +108,6 @@ class DashboardListResource(BaseResource):
 
         return response
 
-    @require_permission('create_dashboard')
     def post(self):
         """
         Creates a new dashboard.

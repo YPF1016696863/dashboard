@@ -299,6 +299,10 @@ class Group(db.Model, BelongsToOrgMixin):
         result = cls.query.filter(cls.permissions.any('user'))
         return list(result)
 
+    @classmethod
+    def find_by_id(cls, ids):
+        result = cls.query.filter(cls.id.in_(ids))
+        return list(result)
 
 @generic_repr('id', 'object_type', 'object_id', 'access_type', 'grantor_id', 'grantee_id')
 class AccessPermission(GFKBase, db.Model):
