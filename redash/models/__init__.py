@@ -429,6 +429,8 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
                            nullable=True)
     tags = Column('tags', MutableList.as_mutable(postgresql.ARRAY(db.Unicode)), nullable=True)
 
+    query_groups = db.relationship("QueryGroup", back_populates="query",
+                                         cascade="all")
     query_class = SearchBaseQuery
     __tablename__ = 'queries'
     __mapper_args__ = {
@@ -694,7 +696,6 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     def parameterized(self):
         return ParameterizedQuery(self.query_text, self.parameters)
 
-
 @listens_for(Query.query_text, 'set')
 def gen_query_hash(target, val, oldval, initiator):
     target.query_hash = utils.gen_query_hash(val)
@@ -705,6 +706,38 @@ def gen_query_hash(target, val, oldval, initiator):
 def query_last_modified_by(target, val, oldval, initiator):
     target.last_modified_by_id = val
 
+@generic_repr('id', 'query_id', 'group_id', 'view_only')
+class QueryGroup(db.Model):
+    # XXX drop id, use query/group as PK
+    id = Column(db.Integer, primary_key=True)
+    query_id = Column(db.Integer, db.ForeignKey("queries.id"))
+    query = db.relationship(Query, back_populates="query_groups")
+    group_id = Column(db.Integer, db.ForeignKey("groups.id"))
+    group = db.relationship(Group, back_populates="queries")
+    view_only = Column(db.Boolean, default=False)
+
+    __tablename__ = "query_groups"
+
+    def to_dict(self, with_permissions_for=None):
+        d = {
+            'id': self.id,
+            'group_id': self.group_id,
+            'query_id': self.query_id,
+            'view_only':self.view_only
+        }
+
+        if with_permissions_for is not None:
+            d['group'] = self.group.to_dict()
+
+        return d
+
+    @classmethod
+    def get_by_query_group(cls, query, group):
+        return cls.query.filter(cls.query_id == query.id, cls.group_id == group.id).one()
+
+    @classmethod
+    def get_by_query(cls, query):
+        return cls.query.filter(cls.query_id == query.id)
 
 @generic_repr('id', 'object_type', 'object_id', 'user_id', 'org_id')
 class Favorite(TimestampMixin, db.Model):
