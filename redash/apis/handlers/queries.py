@@ -167,8 +167,9 @@ def require_access_to_dropdown_queries(user, query_def):
             abort(400, message="You are trying to associate a dropdown query that does not have a matching group. "
                                "Please verify the dropdown query id you are trying to associate with this query.")
 
-        require_access(dict(groups), user, view_only)
-
+        #require_access(dict(groups), user, view_only)
+        abort(400, message="You are trying to associate a dropdown query that does not have group permission. "
+                    "Please verify the dropdown query id you are trying to associate with this query.")
 
 class QueryListResource(BaseQueryListResource):
     @require_permission('create_query')

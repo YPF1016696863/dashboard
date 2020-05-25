@@ -429,8 +429,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
                            nullable=True)
     tags = Column('tags', MutableList.as_mutable(postgresql.ARRAY(db.Unicode)), nullable=True)
 
-    query_groups = db.relationship("QueryGroup", back_populates="query",
-                                         cascade="all")
+    query_groups = db.relationship("QueryGroup", cascade="all, delete-orphan")
     query_class = SearchBaseQuery
     __tablename__ = 'queries'
     __mapper_args__ = {
@@ -438,8 +437,40 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
         'version_id_generator': False
     }
 
+    def to_dict(self, all=False, with_permissions_for=None):
+        d = {
+            'id': self.id,
+            'name': self.name,
+            'query_text': self.query_text,
+            'is_draft': self.is_draft,
+            'description': self.description
+        }
+
+        if all:
+            d['user'] = self.user.to_dict()
+            d['data_source'] = self.data_source.to_dict()
+            d['visualizations'] = self.visualizations.to_dict()
+            d['groups'] = self.groups.to_dict()
+
+        if with_permissions_for is not None:
+            d['view_only'] = db.session.query(QueryGroup.view_only).filter(
+                QueryGroup.group == with_permissions_for,
+                QueryGroup.query_rel == self).one()[0]
+
+        return d
+
     def __str__(self):
         return text_type(self.id)
+
+    @classmethod
+    def create_with_group(cls, *args, **kwargs):
+        query = cls(*args, **kwargs)
+        group = cls(*args, **kwargs)
+        query_group = QueryGroup(
+            query=query,
+            group=group)
+        db.session.add_all([query, query_group])
+        return query
 
     def archive(self, user=None):
         db.session.add(self)
@@ -501,6 +532,43 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
                 QueryResult,
                 QueryResult.id == Query.latest_query_data_id
             )
+                .options(
+                contains_eager(Query.user),
+                contains_eager(Query.latest_query_data),
+            )
+        )
+
+        if not include_drafts:
+            queries = queries.filter(
+                or_(
+                    Query.is_draft.is_(False),
+                    Query.user_id == user_id
+                )
+            )
+        return queries
+
+    @classmethod
+    def get_by_query_group(cls, group_id, user_id=None, include_drafts=False, include_archived=False):
+
+        queries = (
+            cls
+                .query
+                .options(
+                joinedload(Query.visualizations),
+                joinedload(Query.user),
+                joinedload(
+                    Query.latest_query_data
+                ).load_only(
+                    'runtime',
+                    'retrieved_at',
+                )
+            )
+                # Adding outer joins to be able to order by relationship
+                .outerjoin(User, User.id == Query.user_id)
+                .outerjoin(
+                    QueryResult,
+                    QueryResult.id == Query.latest_query_data_id)
+                .outerjoin(QueryGroup, Query.id == QueryGroup.query_id)
                 .options(
                 contains_eager(Query.user),
                 contains_eager(Query.latest_query_data),
@@ -637,6 +705,26 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     def get_by_id(cls, _id):
         return cls.query.filter(cls.id == _id).one()
 
+    def add_group(self, group, view_only=False):
+        dsg = QueryGroup(group=group, query_rel=self, view_only=view_only)
+        db.session.add(dsg)
+        return dsg
+
+    def remove_group(self, group):
+        QueryGroup.query.filter(
+            QueryGroup.group == group,
+            QueryGroup.query_rel == self
+        ).delete()
+        db.session.commit()
+
+    def update_group_permission(self, group, view_only):
+        dsg = QueryGroup.query.filter(
+            QueryGroup.group == group,
+            QueryGroup.query_rel == self).one()
+        dsg.view_only = view_only
+        db.session.add(dsg)
+        return dsg
+
     @classmethod
     def all_groups_for_query_ids(cls, query_ids):
         query = """SELECT group_id, view_only
@@ -711,7 +799,7 @@ class QueryGroup(db.Model):
     # XXX drop id, use query/group as PK
     id = Column(db.Integer, primary_key=True)
     query_id = Column(db.Integer, db.ForeignKey("queries.id"))
-    query = db.relationship(Query, back_populates="query_groups")
+    query_rel = db.relationship(Query, back_populates="query_groups")
     group_id = Column(db.Integer, db.ForeignKey("groups.id"))
     group = db.relationship(Group, back_populates="queries")
     view_only = Column(db.Boolean, default=False)
@@ -874,7 +962,7 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
     tags = Column('tags', MutableList.as_mutable(postgresql.ARRAY(db.Unicode)), nullable=True)
 
     dashboard_groups = db.relationship("DashboardGroup", back_populates="dashboard",
-                                         cascade="all")
+                                         cascade="all, delete-orphan")
 
     __tablename__ = 'dashboards'
     __mapper_args__ = {

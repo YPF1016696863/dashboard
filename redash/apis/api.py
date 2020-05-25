@@ -27,6 +27,8 @@ from redash.apis.handlers.groups import (GroupDataSourceListResource,
                                          GroupDataSourceResource, GroupListResource,
                                          GroupDashboardListResource,GroupDashboardResource,
                                          GroupDashboardListDashboardResource,
+                                         GroupQueryListResource,GroupQueryResource,
+                                         GroupQueryListQueryResource,
                                          GroupMemberListResource,
                                          GroupMemberResource, GroupResource)
 
@@ -108,9 +110,13 @@ api.add_resource(GroupDataSourceListResource, '/api/groups/<group_id>/data_sourc
 api.add_resource(GroupDataSourceResource, '/api/groups/<group_id>/data_sources/<data_source_id>',
                  endpoint='group_data_source')
 api.add_resource(GroupDashboardListResource, '/api/groups/<group_id>/dashboards', endpoint='group_dashboards')
-api.add_resource(GroupDashboardListDashboardResource, '/api/groups/<dashboard_id>/groups', endpoint='group_dashboards_list')
+api.add_resource(GroupDashboardListDashboardResource, '/api/groups/<dashboard_id>/dashboard_groups', endpoint='group_dashboards_list')
 api.add_resource(GroupDashboardResource, '/api/groups/<group_id>/dashboards/<dashboard_id>',
                  endpoint='group_dashboard')
+api.add_resource(GroupQueryListResource, '/api/groups/<group_id>/queries', endpoint='group_queries')
+api.add_resource(GroupQueryListQueryResource, '/api/groups/<query_id>/query_groups', endpoint='group_queries_list')
+api.add_resource(GroupQueryResource, '/api/groups/<group_id>/queries/<query_id>',
+                 endpoint='group_query')
 
 api.add_resource(EventsResource, '/api/events', endpoint='events')
 
