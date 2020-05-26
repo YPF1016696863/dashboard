@@ -450,7 +450,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
             d['user'] = self.user.to_dict()
             d['data_source'] = self.data_source.to_dict()
             d['visualizations'] = self.visualizations.to_dict()
-            d['groups'] = self.groups.to_dict()
+            d['groups'] = self.query_groups.to_dict()
 
         if with_permissions_for is not None:
             d['view_only'] = db.session.query(QueryGroup.view_only).filter(
@@ -548,7 +548,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
         return queries
 
     @classmethod
-    def get_by_query_group(cls, group_id, user_id=None, include_drafts=False, include_archived=False):
+    def get_by_query_group(cls, group_ids, user_id=None, include_drafts=False, include_archived=False):
 
         queries = (
             cls
@@ -574,6 +574,8 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
                 contains_eager(Query.latest_query_data),
             )
         )
+
+        queries = queries.filter(QueryGroup.group_id.in_(group_ids))
 
         if not include_drafts:
             queries = queries.filter(
@@ -734,6 +736,15 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
 
         return db.session.execute(query, {'ids': tuple(query_ids)}).fetchall()
 
+    @classmethod
+    def all_query_groups_for_query_ids(cls, query_ids):
+        query = """SELECT query_id, group_id, view_only
+                   FROM queries
+                   JOIN query_groups ON queries.id = query_groups.query_id
+                   WHERE queries.id in :ids"""
+
+        return db.session.execute(query, {'ids': tuple(query_ids)}).fetchall()
+
     def fork(self, user):
         forked_list = ['org', 'data_source', 'latest_query_data', 'description',
                        'query_text', 'query_hash', 'options']
@@ -822,6 +833,11 @@ class QueryGroup(db.Model):
     @classmethod
     def get_by_query_group(cls, query, group):
         return cls.query.filter(cls.query_id == query.id, cls.group_id == group.id).one()
+
+    @classmethod
+    def get_by_query_groups(cls, query, groups):
+        result = cls.query.filter(cls.query_id == query.id, cls.group_id.in_([group.group_id for group in groups]))
+        return result
 
     @classmethod
     def get_by_query(cls, query):
@@ -981,7 +997,7 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
         if all:
             d['user'] = self.user.to_dict()
             d['widgets'] = self.widgets.to_dict()
-            d['groups'] = self.groups.to_dict()
+            d['groups'] = self.dashboard_groups.to_dict()
 
         if with_permissions_for is not None:
             d['view_only'] = db.session.query(DashboardGroup.view_only).filter(

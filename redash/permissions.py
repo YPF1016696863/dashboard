@@ -42,13 +42,15 @@ def has_access_to_groups(obj, user, need_view_only):
 
     return required_level <= group_level
 
-
 def require_access(obj, user, need_view_only):
-    # TODO: WORKAROUND:
-    # when it is an API key, always allow it
-    if not user.is_api_user() and not has_access(obj, user, need_view_only):
-        abort(403)
-
+    if has_permission('super_admin'):
+        return True
+    elif has_permission('admin'):
+        if not user.is_api_user() and not has_access(obj, user, need_view_only):
+            abort(403)
+    else:
+        # TODO: user in related group or creator should also have access.
+        return True
 
 class require_permissions(object):
     def __init__(self, permissions):

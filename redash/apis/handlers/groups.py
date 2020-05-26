@@ -337,8 +337,6 @@ class GroupQueryListResource(BaseResource):
         query = models.Query.get_by_id_and_org(query_id, self.current_org)
         group = models.Group.get_by_id_and_org(group_id, self.current_org)
 
-        logger.debug(query)
-
         query_group = query.add_group(group)
         models.db.session.commit()
 

@@ -3,17 +3,21 @@ from flask_restful import abort
 from funcy import partial
 from sqlalchemy.orm.exc import StaleDataError
 
+import logging
+
 from redash import models
 from redash.apis.handlers.base import (BaseResource, filter_by_tags, get_object_or_404,
                                        paginate, order_results as _order_results)
 from redash.apis.handlers.query_results import run_query
 from redash.models.parameterized_query import ParameterizedQuery
 from redash.permissions import (can_modify, not_view_only, require_access,
-                                require_admin_or_owner,
+                                require_admin_or_owner,has_permission,
                                 require_object_modify_permission,
                                 require_permission, view_only)
 from redash.serializers import QuerySerializer, serialize_query
 from redash.utils import collect_parameters_from_request
+
+logger = logging.getLogger(__name__)
 
 # Ordering map for relationships
 order_map = {
@@ -87,22 +91,31 @@ class QueryRecentResource(BaseResource):
 class BaseQueryListResource(BaseResource):
 
     def get_queries(self, search_term):
-        if search_term:
-            results = models.Query.search(
-                search_term,
-                self.current_user.group_ids,
-                self.current_user.id,
-                include_drafts=True,
-            )
+
+
+        if has_permission('admin'):
+            if search_term:
+                results = models.Query.search(
+                    search_term,
+                    self.current_user.group_ids,
+                    self.current_user.id,
+                    include_drafts=True,
+                )
+            else:
+                results = models.Query.all_queries(
+                    self.current_user.group_ids,
+                    self.current_user.id,
+                    include_drafts=True,
+                )
         else:
-            results = models.Query.all_queries(
-                self.current_user.group_ids,
-                self.current_user.id,
-                include_drafts=True,
+            results = models.Query.get_by_query_group(
+                    self.current_user.group_ids,
+                    self.current_user.id,
+                    include_drafts=True,
             )
+
         return filter_by_tags(results, models.Query.tags)
 
-    @require_permission('view_query')
     def get(self):
         """
         Retrieve a list of queries.
@@ -167,9 +180,7 @@ def require_access_to_dropdown_queries(user, query_def):
             abort(400, message="You are trying to associate a dropdown query that does not have a matching group. "
                                "Please verify the dropdown query id you are trying to associate with this query.")
 
-        #require_access(dict(groups), user, view_only)
-        abort(400, message="You are trying to associate a dropdown query that does not have group permission. "
-                    "Please verify the dropdown query id you are trying to associate with this query.")
+        require_access(dict(groups), user, view_only)
 
 class QueryListResource(BaseQueryListResource):
     @require_permission('create_query')
@@ -335,7 +346,6 @@ class QueryResource(BaseResource):
 
         return QuerySerializer(query, with_visualizations=True).serialize()
 
-    @require_permission('view_query')
     def get(self, query_id):
         """
         Retrieve a query.
@@ -345,7 +355,10 @@ class QueryResource(BaseResource):
         Responds with the :ref:`query <query-response-label>` contents.
         """
         q = get_object_or_404(models.Query.get_by_id_and_org, query_id, self.current_org)
-        require_access(q, self.current_user, view_only)
+
+        if not has_permission('admin'):
+            if models.QueryGroup.get_by_query_groups(q, q.query_groups).first() is None:
+                abort(404)
 
         api_key_hash = {}
         for vis in q.visualizations:
@@ -358,7 +371,7 @@ class QueryResource(BaseResource):
             if vis_result['id'] in api_key_hash:
                 vis_result['api_key'] = api_key_hash[vis_result['id']]
 
-        result['can_edit'] = can_modify(q, self.current_user)
+        # result['can_edit'] = can_modify(q, self.current_user)
 
         self.record_event({
             'action': 'view',
