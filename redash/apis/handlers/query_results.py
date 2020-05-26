@@ -2,15 +2,18 @@ from flask import make_response, request
 from flask_login import current_user
 from flask_restful import abort
 
+import logging
+
 from redash import models, settings
 from redash.apis.handlers.base import BaseResource, get_object_or_404
 from redash.models.parameterized_query import ParameterizedQuery, InvalidParameterError, dropdown_values
-from redash.permissions import (has_access, not_view_only, require_access,
+from redash.permissions import (has_access, not_view_only, require_access,is_admin_or_owner,
                                 require_permission, view_only)
 from redash.tasks import QueryTask
 from redash.tasks.queries import enqueue_query
 from redash.utils import (collect_parameters_from_request, json_dumps, to_filename)
 
+logger = logging.getLogger(__name__)
 
 def error_response(message):
     return {'job': {'status': 4, 'error': message}}, 400
@@ -58,7 +61,7 @@ def get_download_filename(query_result, query, filetype):
 
 
 class QueryResultListResource(BaseResource):
-    @require_permission('execute_query')
+    # @require_permission('execute_query')
     def post(self):
         """
         Execute a query (or retrieve recent results).
@@ -113,7 +116,6 @@ class QueryResultDropdownResource(BaseResource):
 class QueryDropdownsResource(BaseResource):
     def get(self, query_id, dropdown_query_id):
         query = get_object_or_404(models.Query.get_by_id_and_org, query_id, self.current_org)
-
         related_queries_ids = [p['queryId'] for p in query.parameters if p['type'] == 'query']
         if int(dropdown_query_id) not in related_queries_ids:
             abort(403)
@@ -123,7 +125,7 @@ class QueryDropdownsResource(BaseResource):
 
 class QueryResultResource(BaseResource):
 
-    @require_permission('view_query')
+    # @require_permission('view_query')
     def post(self, query_id):
         """
         Execute a saved query.
@@ -146,16 +148,23 @@ class QueryResultResource(BaseResource):
 
         query = get_object_or_404(models.Query.get_by_id_and_org, query_id, self.current_org)
 
-        allow_executing_with_view_only_permissions = query.parameterized.is_safe
+        # allow_executing_with_view_only_permissions = query.parameterized.is_safe
 
         # TODO: Workaround, always allow APIKEY user
-        if self.current_user.is_api_user or has_access(query, self.current_user, allow_executing_with_view_only_permissions):
+        if self.current_user.is_api_user:
             return run_query(query.parameterized, parameter_values, query.data_source, query_id, max_age)
+        elif not is_admin_or_owner(query.user_id):
+            if models.QueryGroup.get_by_query_groups(query, query.query_groups).first() is None:
+                return {'job': {'status': 4,
+                            'error': 'You do not have permission to run queries with this data source.'}}, 403
+            else:
+                logger.debug("ok to run query...")
+                return run_query(query.parameterized, parameter_values, query.data_source, query_id, max_age)                
         else:
             return {'job': {'status': 4,
                             'error': 'You do not have permission to run queries with this data source.'}}, 403
 
-    @require_permission('view_query')
+    # @require_permission('view_query')
     def get(self, query_id=None, query_result_id=None, filetype='json'):
         """
         Retrieve query results.
@@ -200,7 +209,10 @@ class QueryResultResource(BaseResource):
                     abort(404, message='No cached result found for this query.')
 
         if query_result:
-            require_access(query_result.data_source, self.current_user, view_only)
+            # require_access(query_result.data_source, self.current_user, view_only)
+            if not is_admin_or_owner(query.user_id):
+                if models.QueryGroup.get_by_query_groups(query, query.query_groups).first() is None:
+                    abort(403)
 
             if isinstance(self.current_user, models.ApiUser):
                 event = {

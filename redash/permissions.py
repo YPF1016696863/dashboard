@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import functools
 
 from flask_login import current_user
@@ -103,7 +104,7 @@ def require_permission_or_owner(permission, object_owner_id):
 
 def require_admin_or_owner(object_owner_id):
     if not is_admin_or_owner(object_owner_id):
-        abort(403, message="You don't have permission to edit this resource.")
+        abort(403, message=u"当前用户无权限编辑该资源.")
 
 
 def can_modify(obj, user):

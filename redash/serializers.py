@@ -96,14 +96,18 @@ def serialize_query(query, with_stats=False, with_visualizations=False, with_use
         'version': query.version,
         'tags': query.tags or [],
         'is_safe': query.parameterized.is_safe,
+        'user_id': current_user.id,
+        'created_by': query.user.to_dict(),
+        'user': current_user.to_dict(),
     }
 
     if with_user:
-        d['user'] = query.user.to_dict()
         d['api_key'] = query.api_key
-    else:
-        d['user_id'] = query.user_id
+    #else:
+    #    d['user_id'] = query.user_id
 
+    d['groups'] = [g.to_dict(with_permissions_for=True) for g in models.QueryGroup.get_by_query(query)]
+    
     if with_last_modified_by:
         d['last_modified_by'] = query.last_modified_by.to_dict() if query.last_modified_by is not None else None
     else:

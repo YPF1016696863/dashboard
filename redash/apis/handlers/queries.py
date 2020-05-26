@@ -13,6 +13,7 @@ from redash.models.parameterized_query import ParameterizedQuery
 from redash.permissions import (can_modify, not_view_only, require_access,
                                 require_admin_or_owner,has_permission,
                                 require_object_modify_permission,
+                                is_admin_or_owner,
                                 require_permission, view_only)
 from redash.serializers import QuerySerializer, serialize_query
 from redash.utils import collect_parameters_from_request
@@ -91,7 +92,6 @@ class QueryRecentResource(BaseResource):
 class BaseQueryListResource(BaseResource):
 
     def get_queries(self, search_term):
-
 
         if has_permission('admin'):
             if search_term:
@@ -302,7 +302,6 @@ class MyQueriesResource(BaseResource):
 
 
 class QueryResource(BaseResource):
-    @require_permission('edit_query')
     def post(self, query_id):
         """
         Modify a query.
@@ -318,9 +317,14 @@ class QueryResource(BaseResource):
         Responds with the updated :ref:`query <query-response-label>` object.
         """
         query = get_object_or_404(models.Query.get_by_id_and_org, query_id, self.current_org)
+
+        if not is_admin_or_owner(query.user_id):
+            if models.QueryGroup.get_by_query_groups(query, query.query_groups).first() is None:
+                abort(404)
+
         query_def = request.get_json(force=True)
 
-        require_object_modify_permission(query, self.current_user)
+        #require_object_modify_permission(query, self.current_user)
         require_access_to_dropdown_queries(self.current_user, query_def)
 
         for field in ['id', 'created_at', 'api_key', 'visualizations', 'latest_query_data', 'user', 'last_modified_by',
@@ -354,19 +358,19 @@ class QueryResource(BaseResource):
 
         Responds with the :ref:`query <query-response-label>` contents.
         """
-        q = get_object_or_404(models.Query.get_by_id_and_org, query_id, self.current_org)
+        query = get_object_or_404(models.Query.get_by_id_and_org, query_id, self.current_org)
 
-        if not has_permission('admin'):
-            if models.QueryGroup.get_by_query_groups(q, q.query_groups).first() is None:
+        if not is_admin_or_owner(query.user_id):
+            if models.QueryGroup.get_by_query_groups(query, query.query_groups).first() is None:
                 abort(404)
 
         api_key_hash = {}
-        for vis in q.visualizations:
+        for vis in query.visualizations:
             api_key = models.ApiKey.get_by_object(vis)
             if api_key:
                 api_key_hash[vis.id] = api_key.api_key
 
-        result = QuerySerializer(q, with_visualizations=True).serialize()
+        result = QuerySerializer(query, with_visualizations=True).serialize()
         for vis_result in result['visualizations']:
             if vis_result['id'] in api_key_hash:
                 vis_result['api_key'] = api_key_hash[vis_result['id']]
@@ -381,7 +385,6 @@ class QueryResource(BaseResource):
 
         return result
 
-    @require_permission('edit_query')
     def delete(self, query_id):
         """
         Archives a query.
@@ -389,7 +392,9 @@ class QueryResource(BaseResource):
         :param query_id: ID of query to archive
         """
         query = get_object_or_404(models.Query.get_by_id_and_org, query_id, self.current_org)
-        require_admin_or_owner(query.user_id)
+        if not is_admin_or_owner(query.user_id):
+            if models.QueryGroup.get_by_query_groups(query, query.query_groups).first() is None:
+                abort(404)
         query.archive(self.current_user)
         models.db.session.commit()
 
@@ -434,7 +439,7 @@ class QueryRefreshResource(BaseResource):
             abort(403, message="Please use a user API key.")
 
         query = get_object_or_404(models.Query.get_by_id_and_org, query_id, self.current_org)
-        require_access(query, self.current_user, not_view_only)
+        # require_access(query, self.current_user, not_view_only)
 
         parameter_values = collect_parameters_from_request(request.args)
         parameterized_query = ParameterizedQuery(query.query_text)
