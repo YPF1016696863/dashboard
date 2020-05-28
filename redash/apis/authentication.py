@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_org(org_name, user_name, email, password):
-    default_org = Organization(name=org_name, slug='', settings={})
+    default_org = Organization(name=org_name, slug='default', settings={})
     admin_group = Group(name='admin', permissions=Group.ADMIN_PERMISSIONS, org=default_org, type=Group.BUILTIN_GROUP)
 
     db.session.add_all([default_org, admin_group])

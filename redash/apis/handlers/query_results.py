@@ -210,9 +210,10 @@ class QueryResultResource(BaseResource):
 
         if query_result:
             # require_access(query_result.data_source, self.current_user, view_only)
-            if not is_admin_or_owner(query.user_id):
-                if models.QueryGroup.get_by_query_groups(query, query.query_groups).first() is None:
-                    abort(403)
+            if query is not None:
+                if not is_admin_or_owner(query.user_id):
+                    if models.QueryGroup.get_by_query_groups(query, query.query_groups).first() is None:
+                        abort(403)
 
             if isinstance(self.current_user, models.ApiUser):
                 event = {

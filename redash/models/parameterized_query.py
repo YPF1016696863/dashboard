@@ -25,13 +25,13 @@ def _load_result(query_id, should_require_access):
 
     query = models.Query.get_by_id_and_org(query_id, current_org)
 
-    if should_require_access:
-        require_access(query.data_source, current_user, view_only)
+    #if should_require_access:
+    #    require_access(query.data_source, current_user, view_only)
 
     query_result = models.QueryResult.get_by_id_and_org(query.latest_query_data_id, current_org)
 
     if query.data_source:
-        require_access(query.data_source.groups, current_user, view_only)
+    #    require_access(query.data_source.groups, current_user, view_only)
         query_result = models.QueryResult.get_by_id_and_org(query.latest_query_data_id, current_org)
         return json_loads(query_result.data)
     else:
