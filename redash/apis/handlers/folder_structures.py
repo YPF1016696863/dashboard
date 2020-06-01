@@ -16,7 +16,7 @@ class FolderStructureResource(BaseResource):
         return folder.to_dict()
 
     def delete(self, structure_id):
-        folder = get_object_or_404(models.QuerySnippet.get_by_id, structure_id)
+        folder = get_object_or_404(models.FolderStructure.get_by_id, structure_id)
         models.db.session.delete(folder)
         models.db.session.commit()
 
