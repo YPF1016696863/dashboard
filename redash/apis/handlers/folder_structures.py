@@ -1,8 +1,12 @@
+from flask import request
+from funcy import project
+
 from sqlalchemy.exc import IntegrityError
 
 from redash import models
-from redash.apis.handlers.base import (BaseResource,
-                                       get_object_or_404)
+
+from redash.apis.handlers.base import (BaseResource, get_object_or_404,
+                                       require_fields)
 from redash.permissions import require_access, view_only
 
 class FolderStructureResource(BaseResource):
@@ -26,7 +30,6 @@ class FolderStructureListResource(BaseResource):
         require_fields(req, ('parent_id', 'catalog'))
 
         folder = models.FolderStructure(
-            id=req['id'],
             parent_id=req['parent_id'],
             name=req['name'] if req['name'] else "New Folder",
             catalog=req['catalog']
