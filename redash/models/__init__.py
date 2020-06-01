@@ -1510,10 +1510,10 @@ class QuerySnippet(TimestampMixin, db.Model, BelongsToOrgMixin):
 @generic_repr('id', 'parent_id', 'name', 'catalog')
 class FolderStructure(db.Model):
     id = Column(db.Integer, primary_key=True)
-    parent_id = Column(db.Integer, db.ForeignKey("folder_structures.id"))
+    parent_id = Column(db.Integer, db.ForeignKey("folder_structures.id"), nullable=True)
+    parent_rel = db.relationship("FolderStructure", cascade="all, delete-orphan")
     name = Column(db.String(255), nullable=False, default="New Folder")
     catalog = Column(db.String(255), nullable=False)
-
 
     __tablename__ = 'folder_structures'
 
