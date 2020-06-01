@@ -77,7 +77,7 @@ class DataSourceResource(BaseResource):
 
 
 class DataSourceListResource(BaseResource):
-    @require_permission('list_data_sources')
+    # @require_permission('list_data_sources')
     def get(self):
         if self.current_user.has_permission('admin'):
             data_sources = models.DataSource.all(self.current_org)

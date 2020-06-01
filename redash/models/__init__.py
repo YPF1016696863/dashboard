@@ -509,7 +509,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
                 DataSourceGroup,
                 Query.data_source_id == DataSourceGroup.data_source_id
             )
-                .filter(Query.is_archived.is_(include_archived))
+                .filter(Query.is_archived.is_(False))
                 .filter(DataSourceGroup.group_id.in_(group_ids))
         )
         queries = (
@@ -575,7 +575,14 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
             )
         )
 
-        queries = queries.filter(QueryGroup.group_id.in_(group_ids))
+        queries = queries.filter(
+            QueryGroup.group_id.in_(group_ids) |
+            (Query.user_id == user_id)
+        )
+
+        queries = queries.filter(
+            Query.is_archived.is_(False)
+        )
 
         if not include_drafts:
             queries = queries.filter(
@@ -670,7 +677,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
             group_ids,
             user_id=user_id,
             include_drafts=include_drafts,
-            include_archived=include_archived,
+            include_archived=False,
         )
         # sort the result using the weight as defined in the search vector column
         return all_queries.search(term, sort=True).limit(limit)

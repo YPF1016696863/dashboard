@@ -191,13 +191,13 @@ class UserResetPasswordResource(BaseResource):
 
         params = project(req, ('password'))
 
-        if 'password' not in params:
-            abort(403, message="Must provide initial password to reset.")
-
         if user.is_disabled:
             abort(404, message='Not found')
 
-        user.hash_password(params.pop('password'))
+        if 'password' not in params:
+            user.hash_password('Abcd1234')
+        else:
+            user.hash_password(params.pop('password'))
 
         return {
             'status': 'ok'

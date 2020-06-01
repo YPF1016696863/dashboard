@@ -90,6 +90,8 @@ class User(TimestampMixin, db.Model, BelongsToOrgMixin, UserMixin, PermissionsCh
     disabled_at = Column(db.DateTime(True), default=None, nullable=True)
     details = Column(MutableDict.as_mutable(postgresql.JSON), nullable=True,
                      server_default='{}', default={})
+    is_super = Column('is_super', db.Boolean, default=False)
+
     active_at = json_cast_property(db.DateTime(True), 'details', 'active_at',
                                    default=None)
     is_invitation_pending = json_cast_property(db.Boolean(True), 'details', 'is_invitation_pending', default=False)
@@ -137,6 +139,7 @@ class User(TimestampMixin, db.Model, BelongsToOrgMixin, UserMixin, PermissionsCh
             'active_at': self.active_at,
             'is_invitation_pending': self.is_invitation_pending,
             'is_email_verified': self.is_email_verified,
+            'is_super': self.is_super
         }
 
         if self.password_hash is None:
