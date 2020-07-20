@@ -232,3 +232,16 @@ class VisualizationShareResource(BaseResource):
             'object_id': vis.id,
             'object_type': 'visualization',
         })
+
+class VisualizationFolderResource(BaseResource):
+    def post(self,visualization_id):
+        vis = get_object_or_404(models.Visualization.get_by_id_and_org, visualization_id, self.current_org)
+
+        req = request.get_json(True)
+        if req and "folder_id" in req:
+            vis.update_folder(req['folder_id'])
+        else:
+            abort(400)
+
+        d = serialize_visualization(vis, with_query=False)
+        return d

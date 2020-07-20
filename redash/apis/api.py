@@ -10,13 +10,15 @@ from redash.apis.handlers.dashboards import (DashboardFavoriteListResource,
                                              DashboardResource,
                                              DashboardShareResource,
                                              DashboardTagsResource,
-                                             PublicDashboardResource)
+                                             PublicDashboardResource,
+                                             DashboardFolderResource)
 from redash.apis.handlers.data_sources import (DataSourceListResource,
                                                DataSourcePauseResource,
                                                DataSourceResource,
                                                DataSourceSchemaResource,
                                                DataSourceTestResource,
-                                               DataSourceTypeListResource)
+                                               DataSourceTypeListResource,
+                                               DataSourceFolderResource)
 from redash.apis.handlers.destinations import (DestinationListResource,
                                                DestinationResource,
                                                DestinationTypeListResource)
@@ -39,7 +41,8 @@ from redash.apis.handlers.queries import (MyQueriesResource, QueryArchiveResourc
                                           QueryForkResource, QueryListResource,
                                           QueryRecentResource, QueryRefreshResource,
                                           QueryResource,
-                                          QueryTagsResource)
+                                          QueryTagsResource,
+                                          QueryFolderResource)
 from redash.apis.handlers.query_results import (JobResource,
                                                 QueryResultDropdownResource,
                                                 QueryDropdownsResource,
@@ -64,7 +67,7 @@ from redash.apis.handlers.users import (UserDisableResource, UserInviteResource,
                                         UserResource)
 from redash.apis.handlers.visualizations import (VisualizationListResource,
                                                  VisualizationResource, PublicVisualizationResource,
-                                                 VisualizationShareResource)
+                                                 VisualizationShareResource,VisualizationFolderResource)
 from redash.apis.handlers.widgets import WidgetListResource, WidgetResource
 from redash.utils import json_dumps
 
@@ -94,6 +97,7 @@ api.add_resource(DashboardShareResource, '/api/dashboards/<dashboard_id>/share',
 api.add_resource(DashboardFavoriteListResource, '/api/dashboards/favorites', endpoint='dashboard_favorites')
 api.add_resource(DashboardFavoriteResource, '/api/dashboards/<object_id>/favorite', endpoint='dashboard_favorite')
 api.add_resource(DashboardTagsResource, '/api/dashboards/tags', endpoint='dashboard_tags')
+api.add_resource(DashboardFolderResource, '/api/dashboards/<dashboard_slug>/folder')
 
 api.add_resource(DataSourceTypeListResource, '/api/data_sources/types', endpoint='data_source_types')
 api.add_resource(DataSourceListResource, '/api/data_sources', endpoint='data_sources')
@@ -101,6 +105,7 @@ api.add_resource(DataSourceSchemaResource, '/api/data_sources/<data_source_id>/s
 api.add_resource(DataSourcePauseResource, '/api/data_sources/<data_source_id>/pause')
 api.add_resource(DataSourceTestResource, '/api/data_sources/<data_source_id>/test')
 api.add_resource(DataSourceResource, '/api/data_sources/<data_source_id>', endpoint='data_source')
+api.add_resource(DataSourceFolderResource, '/api/data_sources/<data_source_id>/folder')
 
 api.add_resource(GroupListResource, '/api/groups', endpoint='groups')
 api.add_resource(GroupResource, '/api/groups/<group_id>', endpoint='group')
@@ -131,6 +136,7 @@ api.add_resource(QueryForkResource, '/api/queries/<query_id>/fork', endpoint='qu
 api.add_resource(QueryFavoriteListResource, '/api/queries/favorites', endpoint='query_favorites')
 api.add_resource(QueryFavoriteResource, '/api/queries/<query_id>/favorite', endpoint='query_favorite')
 api.add_resource(QueryTagsResource, '/api/queries/tags', endpoint='query_tags')
+api.add_resource(QueryFolderResource, '/api/queries/<query_id>/folder')
 
 api.add_resource(ObjectPermissionsListResource, '/api/<object_type>/<object_id>/acl', endpoint='object_permissions')
 api.add_resource(CheckPermissionResource, '/api/<object_type>/<object_id>/acl/<access_type>',
@@ -172,6 +178,7 @@ api.add_resource(VisualizationListResource, '/api/visualizations', endpoint='vis
 api.add_resource(VisualizationResource, '/api/visualizations/<visualization_id>', endpoint='visualization')
 api.add_resource(PublicVisualizationResource, '/api/visualizations/public/<token>', endpoint='public_visualization')
 api.add_resource(VisualizationShareResource, '/api/visualizations/<visualization_id>/share', endpoint='visualization_share')
+api.add_resource(VisualizationFolderResource, '/api/visualizations/<visualization_id>/folder')
 
 api.add_resource(WidgetListResource, '/api/widgets', endpoint='widgets')
 api.add_resource(WidgetResource, '/api/widgets/<int:widget_id>', endpoint='widget')

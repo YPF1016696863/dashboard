@@ -503,3 +503,15 @@ class QueryFavoriteListResource(BaseResource):
         })
 
         return response
+
+class QueryFolderResource(BaseResource):
+    def post(self,query_id):
+        query = get_object_or_404(models.Query.get_by_id_and_org, query_id, self.current_org)
+        req = request.get_json(True)
+
+        if req and "folder_id" in req:
+            query.update_folder(req['folder_id'])
+        else:
+            abort(400)
+
+        return query.to_dict()

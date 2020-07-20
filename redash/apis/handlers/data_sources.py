@@ -215,3 +215,18 @@ class DataSourceTestResource(BaseResource):
             return {"message": text_type(e), "ok": False}
         else:
             return {"message": "success", "ok": True}
+
+
+class DataSourceFolderResource(BaseResource):
+    @require_admin
+    def post(self, data_source_id):
+        data_source = get_object_or_404(models.DataSource.get_by_id_and_org, data_source_id, self.current_org)
+
+        req = request.get_json(True)
+        if req and "folder_id" in req:
+            data_source.update_folder(req['folder_id'])
+        else:
+            abort(400)
+
+        return data_source.to_dict()
+

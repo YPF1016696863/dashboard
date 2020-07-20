@@ -99,6 +99,7 @@ def serialize_query(query, with_stats=False, with_visualizations=False, with_use
         'user_id': current_user.id,
         'created_by': query.user.to_dict(),
         'user': current_user.to_dict(),
+        'folder_id': query.folder_id
     }
 
     if with_user:
@@ -138,7 +139,8 @@ def serialize_visualization(object, with_query=True):
         'description': object.description,
         'options': json_loads(object.options),
         'updated_at': object.updated_at,
-        'created_at': object.created_at
+        'created_at': object.created_at,
+        'folder_id': object.folder_id
     }
 
     if with_query:
@@ -223,7 +225,8 @@ def serialize_dashboard(obj, with_widgets=False, user=None, with_favorite_state=
         'version': obj.version,
         'background_image': obj.background_image,
         'description': obj.description,
-        'type': obj.type or 'dashboard'
+        'type': obj.type or 'dashboard',
+        'folder_id' : obj.folder_id
     }
 
     d['groups'] = [g.to_dict(with_permissions_for=True) for g in models.DashboardGroup.get_by_dashboard(obj)]
