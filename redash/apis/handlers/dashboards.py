@@ -369,3 +369,16 @@ class DashboardFavoriteListResource(BaseResource):
         })
 
         return response
+
+
+class DashboardFolderResource(BaseResource):
+    def post(self, dashboard_slug):
+        dashboard = get_object_or_404(models.Dashboard.get_by_slug_and_org, dashboard_slug, self.current_org)
+
+        req = request.get_json(True)
+        if req and "folder_id" in req:
+            dashboard.update_folder(req['folder_id'])
+        else:
+            abort(400)
+
+        return dashboard.to_dict()

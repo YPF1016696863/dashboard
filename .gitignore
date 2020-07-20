@@ -104,3 +104,4 @@ venv.bak/
 
 .idea
 uploads/
+redash/settings/__init__.py

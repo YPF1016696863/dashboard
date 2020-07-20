@@ -66,12 +66,13 @@ scheduled_queries_executions = ScheduledQueriesExecutions()
 
 
 @python_2_unicode_compatible
-@generic_repr('id', 'name', 'type', 'org_id', 'created_at')
+@generic_repr('id', 'name', 'type', 'org_id', 'created_at', 'folder_id')
 class DataSource(BelongsToOrgMixin, db.Model):
     id = Column(db.Integer, primary_key=True)
     org_id = Column(db.Integer, db.ForeignKey('organizations.id'))
     org = db.relationship(Organization, backref="data_sources")
-
+    folder_id = Column(db.Integer, db.ForeignKey('folder_structures.id'), nullable=True, default=None)
+    folder = db.relationship("FolderStructure", backref="data_sources")
     name = Column(db.String(255))
     type = Column(db.String(255))
     options = Column('encrypted_options', ConfigurationContainer.as_mutable(
@@ -95,7 +96,8 @@ class DataSource(BelongsToOrgMixin, db.Model):
             'type': self.type,
             'syntax': self.query_runner.syntax,
             'paused': self.paused,
-            'pause_reason': self.pause_reason
+            'pause_reason': self.pause_reason,
+            'folder_id': self.folder_id
         }
 
         if all:
@@ -215,6 +217,10 @@ class DataSource(BelongsToOrgMixin, db.Model):
             DataSourceGroup.data_source == self
         )
         return dict(map(lambda g: (g.group_id, g.view_only), groups))
+
+    def update_folder(self, folder_id):
+        self.folder_id = folder_id
+        db.session.commit()
 
 
 @generic_repr('id', 'data_source_id', 'group_id', 'view_only')
@@ -395,12 +401,14 @@ def should_schedule_next(previous_iteration, now, interval, time=None, day_of_we
 @gfk_type
 @generic_repr('id', 'name', 'query_hash', 'version', 'user_id', 'org_id',
               'data_source_id','description','query_hash', 'last_modified_by_id',
-              'is_archived', 'is_draft', 'schedule', 'schedule_failures')
+              'is_archived', 'is_draft', 'schedule', 'schedule_failures', 'folder_id')
 class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     id = Column(db.Integer, primary_key=True)
     version = Column(db.Integer, default=1)
     org_id = Column(db.Integer, db.ForeignKey('organizations.id'))
     org = db.relationship(Organization, backref="queries")
+    folder_id = Column(db.Integer, db.ForeignKey("folder_structures.id"), nullable=True, default=None)
+    folder = db.relationship("FolderStructure", backref="queries")
     data_source_id = Column(db.Integer, db.ForeignKey("data_sources.id"), nullable=True)
     data_source = db.relationship(DataSource, backref='queries')
     latest_query_data_id = Column(db.Integer, db.ForeignKey("query_results.id"), nullable=True)
@@ -443,7 +451,8 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
             'name': self.name,
             'query_text': self.query_text,
             'is_draft': self.is_draft,
-            'description': self.description
+            'description': self.description,
+            'folder_id': self.folder_id
         }
 
         if all:
@@ -802,6 +811,10 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     def parameterized(self):
         return ParameterizedQuery(self.query_text, self.parameters)
 
+    def update_folder(self, folder_id):
+        self.folder_id = folder_id
+        db.session.commit()
+
 @listens_for(Query.query_text, 'set')
 def gen_query_hash(target, val, oldval, initiator):
     target.query_hash = utils.gen_query_hash(val)
@@ -963,12 +976,14 @@ def generate_slug(ctx):
 @python_2_unicode_compatible
 @gfk_type
 @generic_repr('id', 'name', 'slug', 'user_id', 'org_id', 'description', 'type', 'version', 'is_archived', 'is_draft',
-              'background_image')
+              'background_image', 'folder_id')
 class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     id = Column(db.Integer, primary_key=True)
     version = Column(db.Integer)
     org_id = Column(db.Integer, db.ForeignKey("organizations.id"))
     org = db.relationship(Organization, backref="dashboards")
+    folder_id = Column(db.Integer, db.ForeignKey("folder_structures.id"), nullable=True, default=None)
+    folder = db.relationship("FolderStructure", backref="dashboards")
     slug = Column(db.String(140), index=True, default=generate_slug)
     name = Column(db.String(100))
     user_id = Column(db.Integer, db.ForeignKey("users.id"))
@@ -998,7 +1013,8 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
             'name': self.name,
             'type': self.type,
             'is_draft': self.is_draft,
-            'description': self.description
+            'description': self.description,
+            'folder_id': self.folder_id
         }
 
         if all:
@@ -1155,6 +1171,11 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
         "The SQLAlchemy expression for the property above."
         return func.lower(cls.name)
 
+    def update_folder(self, folder_id):
+        self.folder_id = folder_id
+        db.session.commit()
+
+
 
 @generic_repr('id', 'dashboard_id', 'group_id', 'view_only')
 class DashboardGroup(db.Model):
@@ -1191,7 +1212,7 @@ class DashboardGroup(db.Model):
 
 @python_2_unicode_compatible
 @gfk_type
-@generic_repr('id', 'name', 'type', 'query_id', 'description','is_archived', 'version')
+@generic_repr('id', 'name', 'type', 'query_id', 'description', 'is_archived', 'version', 'folder_id')
 class Visualization(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     id = Column(db.Integer, primary_key=True)
     version = Column(db.Integer, default=1)
@@ -1199,6 +1220,8 @@ class Visualization(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.M
     query_id = Column(db.Integer, db.ForeignKey("queries.id"))
     # query_rel and not query, because db.Model already has query defined.
     query_rel = db.relationship(Query, back_populates='visualizations')
+    folder_id = Column(db.Integer, db.ForeignKey("folder_structures.id"), nullable=True, default=None)
+    folder = db.relationship("FolderStructure", backref="visualizations")
     user_id = Column(db.Integer, db.ForeignKey("users.id"))
     user = db.relationship(User)
     name = Column(db.String(255))
@@ -1267,6 +1290,10 @@ class Visualization(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.M
             'description': self.description,
             'options': self.options
         }
+
+    def update_folder(self, folder_id):
+        self.folder_id = folder_id
+        db.session.commit()
 
 
 @python_2_unicode_compatible
