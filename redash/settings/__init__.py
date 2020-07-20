@@ -8,7 +8,7 @@ from .helpers import fix_assets_path, array_from_string, parse_boolean, int_or_n
 from .organization import DATE_FORMAT, TIME_FORMAT  # noqa
 
 
-REDIS_URL = os.environ.get('REDASH_REDIS_URL', os.environ.get('REDIS_URL', "redis://192.168.99.105:6379/0"))
+REDIS_URL = os.environ.get('REDASH_REDIS_URL', os.environ.get('REDIS_URL', "redis://localhost:6379/0"))
 PROXIES_COUNT = int(os.environ.get('REDASH_PROXIES_COUNT', "1"))
 
 STATSD_HOST = os.environ.get('REDASH_STATSD_HOST', "127.0.0.1")
@@ -18,7 +18,7 @@ STATSD_USE_TAGS = parse_boolean(os.environ.get('REDASH_STATSD_USE_TAGS', "false"
 
 # Connection settings for Redash's own database (where we store the queries, results, etc)
 SQLALCHEMY_DATABASE_URI = os.environ.get("REDASH_DATABASE_URL",
-                                         os.environ.get('DATABASE_URL', "postgresql://postgres@192.168.99.105/postgres"))
+                                         os.environ.get('DATABASE_URL', "postgresql://postgres@localhost/postgres"))
 SQLALCHEMY_MAX_OVERFLOW = int_or_none(os.environ.get("SQLALCHEMY_MAX_OVERFLOW"))
 SQLALCHEMY_POOL_SIZE = int_or_none(os.environ.get("SQLALCHEMY_POOL_SIZE"))
 SQLALCHEMY_DISABLE_POOL = parse_boolean(os.environ.get("SQLALCHEMY_DISABLE_POOL", "false"))
