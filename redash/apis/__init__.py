@@ -17,7 +17,7 @@ def json_response_with_status(response, status):
 
 
 def init_app(app):
-    from redash.apis import admin, authentication, config, queries, organization, file_upload
+    from redash.apis import admin, authentication, config, queries, organization, file_upload, image_upload
     app.config.setdefault('MAX_CONTENT_LENGTH', settings.FILE_UPLOAD_MAX_CONTENT_LENGTH)
 
     app.register_blueprint(routes)

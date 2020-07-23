@@ -328,3 +328,10 @@ FILE_UPLOAD_FOLDER = fix_assets_path("../uploads")
 FILE_UPLOAD_ALLOWED_EXTENSIONS = set(['xls', 'xlsx', 'xlsm'])
 FILE_UPLOAD_MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 FILE_EXCEL_ALLOWED_EXTENSIONS = set(['xls', 'xlsx', 'xlsm'])
+
+
+# IMAGE STUFF
+IMAGE_UPLOAD_FOLDER = fix_assets_path(STATIC_ASSETS_PATH)
+IMAGE_UPLOAD_ALLOWED_EXTENSIONS = set(['jpg', 'png', 'jpeg','gif'])
+IMAGE_UPLOAD_MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+IMAGE_ALLOWED_EXTENSIONS = set(['jpg', 'png', 'jpeg','gif'])
