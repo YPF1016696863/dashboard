@@ -1,6 +1,6 @@
 from flask import request
 from funcy import project
-
+from flask_restful import abort
 from sqlalchemy.exc import IntegrityError
 
 from redash import models
@@ -20,6 +20,17 @@ class FolderStructureResource(BaseResource):
         models.db.session.delete(folder)
         models.db.session.commit()
         return folder.to_dict()
+
+    def post(self, structure_id):
+        folder = get_object_or_404(models.FolderStructure.get_by_id,
+                                    structure_id)
+        req = request.get_json(True)
+        if req and "name" in req:
+            folder.update_name(req['name'])
+        else:
+            abort(400)
+        return folder.to_dict()
+
 
 class FolderStructureListResource(BaseResource):
     def get(self):

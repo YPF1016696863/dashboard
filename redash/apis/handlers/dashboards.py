@@ -123,7 +123,8 @@ class DashboardListResource(BaseResource):
                                      is_draft=True,
                                      description=dashboard_properties.get('description', ''),
                                      type=dashboard_properties.get('type', ''),
-                                     layout='[]')
+                                     layout='[]',
+                                     folder_id=dashboard_properties['folder_id'])
         models.db.session.add(dashboard)
         models.db.session.commit()
         return serialize_dashboard(dashboard)
