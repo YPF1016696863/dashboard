@@ -123,6 +123,7 @@ class DataSourceListResource(BaseResource):
             datasource = models.DataSource.create_with_group(org=self.current_org,
                                                              name=req['name'],
                                                              type=req['type'],
+                                                             folder_id=req['folder_id'],
                                                              options=config)
 
             models.db.session.commit()

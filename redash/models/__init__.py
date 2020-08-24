@@ -506,6 +506,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
                                      description='',
                                      type="TABLE",
                                      user=kwargs.get('user'),
+                                     folder_id=kwargs.get('folder_id'),
                                      options="{}"))
         return query
 
@@ -1561,6 +1562,10 @@ class FolderStructure(db.Model):
         }
 
         return d
+
+    def update_name(self, name):
+        self.name = name
+        db.session.commit()
 
 def init_db():
     default_org = Organization(name="Default", slug='default', settings={})
