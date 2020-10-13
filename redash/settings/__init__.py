@@ -240,6 +240,7 @@ ACCESS_CONTROL_ALLOW_HEADERS = os.environ.get("REDASH_CORS_ACCESS_CONTROL_ALLOW_
 default_query_runners = [
     'redash.query_runner.db2',
     'redash.query_runner.elasticsearch',
+    'redash.query_runner.csvupload',
     'redash.query_runner.excel',
     'redash.query_runner.graphite',
     'redash.query_runner.hive_ds',
@@ -323,11 +324,11 @@ SQLPARSE_FORMAT_OPTIONS = {
     'keyword_case': os.environ.get('SQLPARSE_FORMAT_KEYWORD_CASE', 'upper'),
 }
 
-# FILE STUFF
+# FILE STUFF debugger use /opt/redash/uploads   package use ../uploads
 FILE_UPLOAD_FOLDER = fix_assets_path("../uploads")
-FILE_UPLOAD_ALLOWED_EXTENSIONS = set(['xls', 'xlsx', 'xlsm'])
+FILE_UPLOAD_ALLOWED_EXTENSIONS = set(['xls', 'xlsx', 'xlsm', 'csv'])
 FILE_UPLOAD_MAX_CONTENT_LENGTH = 16 * 1024 * 1024
-FILE_EXCEL_ALLOWED_EXTENSIONS = set(['xls', 'xlsx', 'xlsm'])
+FILE_EXCEL_ALLOWED_EXTENSIONS = set(['xls', 'xlsx', 'xlsm', 'csv'])
 
 
 # IMAGE STUFF

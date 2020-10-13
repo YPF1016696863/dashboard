@@ -1,7 +1,9 @@
 import os
 import uuid
+import csv
 
 import xlrd
+
 
 from redash import settings
 from redash.query_runner import *
@@ -80,7 +82,7 @@ def random():
 def get_ext(filename):
     if '.' in filename:
         ext = filename.rsplit('.', 1)[1].lower()
-        if ext in settings.FILE_EXCEL_ALLOWED_EXTENSIONS:
+        if ext in ["csv"]:
             return ext
 
     return None
@@ -95,7 +97,7 @@ def sheet_index(s):
     return s, 0
 
 
-class ExcelUpload(BaseQueryRunner):
+class CsvUpload(BaseQueryRunner):
     @classmethod
     def configuration_schema(cls):
         return {
@@ -113,29 +115,62 @@ class ExcelUpload(BaseQueryRunner):
 
     @classmethod
     def name(cls):
-        return "Excel Upload"
+        return "Csv Upload"
 
     def run_query(self, query, user):
         try:
             filename = query.strip()
             if filename == "":
                 return None, "Empty query"
-
-            filename, idx = sheet_index(filename)
+            # print ("filename", filename)
             ext = get_ext(filename)
-
+            # print ("ext", ext)
             if ext is None:
-                return None, "Accepting only excel files"
+                return None, "Accepting only Csv files"
 
             path = os.path.abspath(os.path.join(settings.FILE_UPLOAD_FOLDER, filename))
-            data = parse_excel(path, idx)
-            # print (data)
+
+            reader = csv.reader(open(path))
+
+
+            line_num=0
+            heads=[]
+            bodys=[]
+            for list in reader:
+                if(line_num!=0):
+                    bodys.append(list)
+                else:
+                    heads=list
+                line_num+=1
+
+            rows=[]
+            columns=[]
+            for head in heads:
+                column={
+                    'type': 'string',
+                    'friendly_name': head.decode('utf-8'),
+                    'name': head.decode('utf-8')
+                }
+                columns.append(column)
+
+            for body in bodys:
+                row={}
+                for head in heads:
+                    index = heads.index(head)
+                    row[head]=body[index]
+                rows.append(row)
+            # print ("heads", heads)
+            # print ("bodys", bodys)
+
+
+            data = {'columns': columns, 'rows': rows}
+            # return None, "done"
             return json_dumps(data), None
         except KeyboardInterrupt:
             return None, "Query cancelled by user."
 
 
-class Excel(BaseHTTPQueryRunner):
+class Csv(BaseHTTPQueryRunner):
     requires_url = False
 
     @classmethod
@@ -168,7 +203,7 @@ class Excel(BaseHTTPQueryRunner):
             ext = get_ext(url)
 
             if ext is None:
-                return None, "Accepting only excel files"
+                return None, "Accepting only Csv files"
 
             response, error = self.get_response(url)
             if error is not None:
@@ -185,8 +220,8 @@ class Excel(BaseHTTPQueryRunner):
             return None, "Query cancelled by user."
 
 
-register(Excel)
-register(ExcelUpload)
+register(Csv)
+register(CsvUpload)
 
-# x = Excel({})
-# print(x.run_query('http://whly.gd.gov.cn/gd_zww/upload/file/file/201801/26144653sx0l.xls', None))
+# x = CsvUpload({})
+# print(x.run_query(os.path.abspath(os.path.join("/workspace", "1.csv")), None))
